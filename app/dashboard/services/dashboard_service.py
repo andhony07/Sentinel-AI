@@ -89,6 +89,19 @@ class DashboardService:
         self.diagnostic_engine: DiagnosticEngine = (
             diagnostic_engine or DiagnosticEngine()
         )
+        self._ai_service: Optional[Any] = None
+
+    @property
+    def ai_service(self) -> Any:
+        """Lazily initialize and return the AIDiagnosticService coordinator."""
+        if self._ai_service is None:
+            from app.ai.service import AIDiagnosticService
+
+            self._ai_service = AIDiagnosticService(
+                settings=self.settings,
+                dashboard_service=self,
+            )
+        return self._ai_service
 
     # -------------------------------------------------------------------------
     # Latest Data Access

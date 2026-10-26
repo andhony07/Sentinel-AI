@@ -110,6 +110,24 @@ class Settings:
             "http://127.0.0.1:3000",
         ]
     )
+    ai_enabled: bool = True
+    ai_provider: str = "gemma"
+    ai_base_url: str = "http://localhost:11434"
+    ai_model_name: str = "gemma-4-26b-a4b-it"
+    ai_timeout_seconds: float = 30.0
+    ai_temperature: float = 0.2
+    gemma_api_key: Optional[str] = None
+    gemma_model: str = "gemma-4-26b-a4b-it"
+    gemma_alternative_model: str = "gemma-4-31b-it"
+
+    def get_masked_gemma_key(self) -> str:
+        """Return safe masked representation of Gemma API key without exposing secret."""
+        if not self.gemma_api_key:
+            return "Not configured"
+        key_len = len(self.gemma_api_key)
+        if key_len <= 8:
+            return "***"
+        return f"{self.gemma_api_key[:4]}...{self.gemma_api_key[-4:]}"
 
     def __post_init__(self) -> None:
         """Validate configuration settings values."""
@@ -204,6 +222,23 @@ class Settings:
         if not (1024 <= self.dashboard_port <= 65535):
             raise ValueError(
                 f"dashboard_port must be in range [1024, 65535], got: {self.dashboard_port}"
+            )
+
+        if self.ai_timeout_seconds <= 0:
+            raise ValueError(
+                f"ai_timeout_seconds must be positive, got: {self.ai_timeout_seconds}"
+            )
+
+        if not (0.0 <= self.ai_temperature <= 2.0):
+            raise ValueError(
+                f"ai_temperature must be in range [0.0, 2.0], got: {self.ai_temperature}"
+            )
+
+        valid_ai_providers = {"gemma", "ollama", "heuristic", "mock"}
+        if self.ai_provider.lower().strip() not in valid_ai_providers:
+            raise ValueError(
+                f"Invalid ai_provider '{self.ai_provider}'. Must be one of: "
+                f"{', '.join(sorted(valid_ai_providers))}"
             )
 
     def ensure_directories(self) -> None:
@@ -542,10 +577,69 @@ def load_config(
     else:
         cors_origins = [
             "http://localhost:5173",
+            "http://localhost:5174",
             "http://localhost:3000",
             "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174",
             "http://127.0.0.1:3000",
         ]
+
+    # AI Diagnostic Assistant settings (Gemma 4 via Google Gemini API)
+    raw_ai_enabled = overrides.get("ai_enabled", os.getenv("AI_ENABLED", "true"))
+    if isinstance(raw_ai_enabled, bool):
+        ai_enabled = raw_ai_enabled
+    else:
+        ai_enabled = str(raw_ai_enabled).lower().strip() in ("1", "true", "yes", "on")
+
+    gemma_api_key = overrides.get("gemma_api_key", os.getenv("GEMMA_API_KEY", os.getenv("GEMINI_API_KEY")))
+    if isinstance(gemma_api_key, str):
+        gemma_api_key = gemma_api_key.strip()
+        if not gemma_api_key:
+            gemma_api_key = None
+
+    gemma_model = str(overrides.get("gemma_model", os.getenv("GEMMA_MODEL", "gemma-4-26b-a4b-it"))).strip()
+    if not gemma_model:
+        gemma_model = "gemma-4-26b-a4b-it"
+
+    gemma_alternative_model = str(
+        overrides.get("gemma_alternative_model", os.getenv("GEMMA_ALTERNATIVE_MODEL", "gemma-4-31b-it"))
+    ).strip()
+    if not gemma_alternative_model:
+        gemma_alternative_model = "gemma-4-31b-it"
+
+    ai_provider = str(overrides.get("ai_provider", os.getenv("AI_PROVIDER", "gemma"))).lower().strip()
+    if not ai_provider:
+        ai_provider = "gemma"
+
+    ai_base_url = str(overrides.get("ai_base_url", os.getenv("AI_BASE_URL", "http://localhost:11434"))).rstrip("/")
+    if not ai_base_url:
+        ai_base_url = "http://localhost:11434"
+
+    default_model = gemma_model if ai_provider == "gemma" else "qwen2.5:3b"
+    ai_model_name = str(overrides.get("ai_model_name", os.getenv("AI_MODEL_NAME", default_model))).strip()
+    if not ai_model_name:
+        ai_model_name = default_model
+
+    raw_ai_timeout = overrides.get(
+        "ai_timeout_seconds",
+        os.getenv("GEMMA_TIMEOUT_SECONDS", os.getenv("AI_TIMEOUT_SECONDS", "30.0"))
+    )
+    if raw_ai_timeout is None or (isinstance(raw_ai_timeout, str) and not raw_ai_timeout.strip()):
+        ai_timeout_seconds = 30.0
+    else:
+        try:
+            ai_timeout_seconds = float(raw_ai_timeout)  # type: ignore[arg-type]
+        except (TypeError, ValueError) as err:
+            raise ValueError(f"Invalid AI_TIMEOUT_SECONDS: '{raw_ai_timeout}'. Must be a numeric value.") from err
+
+    raw_ai_temp = overrides.get("ai_temperature", os.getenv("AI_TEMPERATURE", "0.2"))
+    if raw_ai_temp is None or (isinstance(raw_ai_temp, str) and not raw_ai_temp.strip()):
+        ai_temperature = 0.2
+    else:
+        try:
+            ai_temperature = float(raw_ai_temp)  # type: ignore[arg-type]
+        except (TypeError, ValueError) as err:
+            raise ValueError(f"Invalid AI_TEMPERATURE: '{raw_ai_temp}'. Must be a numeric value.") from err
 
     return Settings(
         app_name=app_name,
@@ -584,6 +678,15 @@ def load_config(
         api_host=api_host,
         api_port=api_port,
         cors_origins=cors_origins,
+        ai_enabled=ai_enabled,
+        ai_provider=ai_provider,
+        ai_base_url=ai_base_url,
+        ai_model_name=ai_model_name,
+        ai_timeout_seconds=ai_timeout_seconds,
+        ai_temperature=ai_temperature,
+        gemma_api_key=gemma_api_key,
+        gemma_model=gemma_model,
+        gemma_alternative_model=gemma_alternative_model,
     )
 
 

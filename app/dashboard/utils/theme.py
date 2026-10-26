@@ -65,7 +65,7 @@ class ThemeTokens:
 
 DARK_TOKENS = ThemeTokens(
     mode="dark",
-    name="Dark (AIOps Ops-Center)",
+    name="Dark (SentinelAI Ops-Center)",
     bg_app="#0B0F19",
     bg_card="#151D2C",
     bg_card_secondary="#1E293B",
@@ -222,7 +222,7 @@ def generate_theme_css(tokens: ThemeTokens) -> str:
     return f"""
 <style>
 /* ==========================================================================
-   AI-Based Server Health Monitoring - AIOps Command Center ({tokens.mode.upper()})
+   SentinelAI - Intelligent Infrastructure Monitoring Console ({tokens.mode.upper()})
    ========================================================================== */
 :root {{
     --bg-app: {tokens.bg_app};
@@ -246,6 +246,49 @@ def generate_theme_css(tokens: ThemeTokens) -> str:
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }}
 
+/* Prevent aggressive page-wide dimming during Streamlit rerun / AI inference */
+.stApp[data-test-script-state="running"] [data-testid="stVerticalBlock"] {{
+    opacity: 1 !important;
+}}
+[data-testid="stAppViewContainer"] > .main {{
+    opacity: 1 !important;
+}}
+
+/* Prominent, readable spinner and progress cards */
+[data-testid="stSpinner"] {{
+    background: rgba(17, 24, 39, 0.95) !important;
+    border: 1px solid {tokens.accent} !important;
+    border-radius: 8px !important;
+    padding: 12px 18px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+    margin: 12px 0 !important;
+}}
+[data-testid="stSpinner"] > div {{
+    color: {tokens.text_primary} !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+}}
+
+/* Code container scrollbar and wrapping */
+pre, code {{
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+}}
+
+/* Fix layout clipping and horizontal overflow at standard laptop viewports */
+.main .block-container {{
+    max-width: 100% !important;
+    padding: 1.25rem 2rem 2.5rem 2rem !important;
+    overflow-x: hidden;
+}}
+
+/* Main headings and titles: prevent clipping & wrap naturally */
+h1, h2, h3, h4, h5, h6 {{
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    letter-spacing: -0.02em;
+}}
+
 /* Sidebar Container */
 [data-testid="stSidebar"] {{
     background-color: {tokens.bg_sidebar} !important;
@@ -255,6 +298,23 @@ def generate_theme_css(tokens: ThemeTokens) -> str:
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] span,
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {{
     color: {tokens.text_primary} !important;
+}}
+
+/* Active navigation item styling in sidebar */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] > label {{
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    transition: background-color 150ms ease, color 150ms ease !important;
+    margin-bottom: 2px !important;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] > label:hover {{
+    background-color: {tokens.bg_card_secondary} !important;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] > label:has(input:checked) {{
+    background-color: rgba(56, 189, 248, 0.12) !important;
+    border-left: 3px solid {tokens.accent} !important;
+    color: {tokens.text_primary} !important;
+    font-weight: 600 !important;
 }}
 
 /* Metric Cards Default Overrides */
@@ -352,7 +412,8 @@ p, span, label {{
     background-color: {tokens.bg_card} !important;
 }}
 
-/* Custom AIOps Command Center Components */
+/* Custom SentinelAI & Legacy AIOps Command Center Components */
+.sentinel-card,
 .aiops-card {{
     background-color: {tokens.bg_card};
     border: 1px solid {tokens.border_color};
@@ -377,6 +438,7 @@ p, span, label {{
     font-weight: 700;
     letter-spacing: 0.4px;
 }}
+.sentinel-empty-state,
 .aiops-empty-state {{
     background-color: {tokens.bg_card};
     border: 1px dashed {tokens.border_color};
@@ -385,12 +447,14 @@ p, span, label {{
     text-align: center;
     margin: 12px 0;
 }}
+.sentinel-empty-state .title,
 .aiops-empty-state .title {{
     font-size: 14px;
     font-weight: 700;
     color: {tokens.text_primary};
     margin-top: 8px;
 }}
+.sentinel-empty-state .desc,
 .aiops-empty-state .desc {{
     font-size: 12px;
     color: {tokens.text_secondary};

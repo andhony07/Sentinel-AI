@@ -52,7 +52,7 @@ export async function apiClient<T>(
     throw new ApiException(
       0,
       `Network Error: Failed to communicate with server at ${url}. ${errorMsg}`,
-      'Connection refused or network unreachable. Ensure the FastAPI backend is running on http://127.0.0.1:8000.'
+      'Connection refused or network unreachable. Ensure the FastAPI backend is running on http://127.0.0.1:8081.'
     );
   }
 

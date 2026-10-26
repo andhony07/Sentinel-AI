@@ -1,4 +1,5 @@
-"""Playwright End-to-End Test Suite for AI Server Health & Failure Risk Monitor.
+import threading
+"""Playwright End-to-End Test Suite for SentinelAI Infrastructure Monitoring.
 
 Validates the running Streamlit web application at http://localhost:8501:
 - Application startup and executive header rendering
@@ -32,7 +33,23 @@ except ImportError:
     sync_playwright = None  # type: ignore[assignment]
     pytestmark = pytest.mark.skip(reason="Playwright not installed in Python environment")
 
-DASHBOARD_URL = "http://localhost:8501"
+import socket
+
+def _detect_react_url() -> str:
+    if os.getenv("REACT_APP_URL"):
+        return os.environ["REACT_APP_URL"]
+    for port in (5174, 5173):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(0.5)
+                if s.connect_ex(("127.0.0.1", port)) == 0:
+                    return f"http://localhost:{port}"
+        except Exception:
+            pass
+    return "http://localhost:5173"
+
+DASHBOARD_URL = os.getenv("DASHBOARD_URL", "http://localhost:8501")
+REACT_APP_URL = _detect_react_url()
 SCREENSHOT_DIR = Path(__file__).resolve().parent / "screenshots_final"
 SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -83,11 +100,23 @@ def navigate_sidebar(page: Page, view_name: str) -> None:
     if not page.url.startswith("http"):
         page.goto(DASHBOARD_URL, wait_until="networkidle")
         wait_for_streamlit_ready(page)
-    nav_radio = page.locator('[data-testid="stSidebar"] [data-testid="stRadio"]').first
-    nav_option = nav_radio.locator(f'label:has-text("{view_name}")')
-    nav_option.scroll_into_view_if_needed()
-    nav_option.click(force=True)
-    page.wait_for_timeout(2000)
+    alias_map = {
+        "Health & Risk Analysis": "Health & Failure Risk",
+        "Anomaly Simulation": "Anomaly Simulation Lab",
+        "Historical Telemetry": "Telemetry History",
+        "Anomaly Audit Log": "Incident & Audit Trail",
+        "Database & Operational Status": "System Operations",
+    }
+    target = alias_map.get(view_name, view_name)
+    sidebar = page.locator('[data-testid="stSidebar"]')
+    sidebar.scroll_into_view_if_needed()
+    nav_radio = sidebar.locator('[data-testid="stRadio"]').first
+    nav_option = nav_radio.locator(f'label:has-text("{target}")')
+    if nav_option.count() == 0:
+        nav_option = nav_radio.locator(f'label:has-text("{view_name}")')
+    nav_option.first.scroll_into_view_if_needed()
+    nav_option.first.click(force=True)
+    page.wait_for_timeout(2500)
     assert_no_streamlit_exceptions(page, f"Navigating to {view_name}")
 
 
@@ -100,17 +129,17 @@ class TestDashboardPlaywrightE2E:
         wait_for_streamlit_ready(page)
 
         # Check browser tab title
-        assert "Server Health & Failure Risk Monitor" in page.title()
+        assert "SentinelAI" in page.title()
 
         # Check executive banner header
         header = page.locator("h2").first
         header.wait_for(state="visible", timeout=10000)
         header_text = header.inner_text()
-        assert "AI Server Health & Failure Risk Monitor" in header_text
+        assert "SentinelAI" in header_text
 
         # Verify operational indicators in top banner
         main_content = page.locator('[data-testid="stMain"]').inner_text()
-        assert "AI Server Health & Failure Risk Monitor" in main_content
+        assert "SentinelAI" in main_content
         assert "Isolation Forest" in main_content or "Real-Time OS Telemetry" in main_content
 
         # Confirm no runtime exception panels
@@ -172,7 +201,9 @@ class TestDashboardPlaywrightE2E:
         # Check for the previous bug: get_theme_risk_badge() got an unexpected keyword argument 'theme'
         assert_no_streamlit_exceptions(page, "Health & Risk Analysis page load")
 
-        # Verify radial health and anomaly Plotly gauges
+        # Verify radial health and anomaly Plotly gauges (wait for asynchronous render)
+        page.wait_for_selector('.js-plotly-plot', timeout=10000)
+        page.wait_for_timeout(2000)
         gauges = page.locator('.js-plotly-plot').all()
         assert len(gauges) >= 2, "Expected Health Score gauge and Calibrated Anomaly gauge"
 
@@ -220,7 +251,7 @@ class TestDashboardPlaywrightE2E:
         run_btn.click()
 
         # Wait for simulation execution to complete
-        page.wait_for_timeout(3500)
+        page.locator('text=Machine Learning Pipeline Evaluation').wait_for(state="visible", timeout=15000)
         assert_no_streamlit_exceptions(page, "Post-simulation execution")
 
         # Verify simulated telemetry section appeared
@@ -386,3 +417,215 @@ class TestDashboardPlaywrightE2E:
         # Filter out benign third-party or web socket lifecycle noise if any
         critical_errors = [e for e in errors if "TypeError" in e or "ReferenceError" in e or "Uncaught" in e]
         assert len(critical_errors) == 0, f"Critical JavaScript/Console errors detected: {critical_errors}"
+
+    def test_k_responsive_layout_no_overflow(self, page: Page) -> None:
+        """Test K: Verify that dashboard headings and containers do not clip or produce horizontal overflow."""
+        for width, height in [(1440, 900), (1280, 800)]:
+            page.set_viewport_size({"width": width, "height": height})
+            page.goto(DASHBOARD_URL, wait_until="networkidle")
+            wait_for_streamlit_ready(page)
+
+            # Ensure page header fits inside viewport width
+            header = page.locator("h2").first
+            header.wait_for(state="visible", timeout=10000)
+            assert header.is_visible()
+            box = header.bounding_box()
+            assert box is not None
+            assert box["width"] > 0 and box["width"] <= width
+
+            # Verify no horizontal document overflow (allow <= 5px for scrollbar styling)
+            scroll_width = page.evaluate("document.documentElement.scrollWidth")
+            client_width = page.evaluate("document.documentElement.clientWidth")
+            assert scroll_width <= client_width + 5, f"Horizontal overflow detected at {width}x{height}: scrollWidth={scroll_width}, clientWidth={client_width}"
+
+    def test_l_react_ai_diagnostic_assistant(self, page: Page) -> None:
+        """Test L: Verify SentinelAI AI Diagnostic Assistant in the React frontend (parity with Streamlit).
+
+        Validates:
+        - Navigation to Health & Failure Risk view in React at http://localhost:5173
+        - Presence of AI Diagnostic Assistant card, model name badge, and live/fallback status
+        - Loading state and duplicate-submit prevention during inference
+        - Full diagnosis display: incident summary, authoritative ML scores, probable causes,
+          investigation steps, remediation runbook with commands, and uncertainty assessment
+        - Prominent mandatory human-review safety banner (autonomous execution disabled)
+        - Deterministic fallback state rendering and latency reporting
+        - API error handling with retry state
+        """
+        # Step 1: Open React frontend
+        page.goto(REACT_APP_URL, wait_until="networkidle")
+        page.wait_for_timeout(1000)
+
+        # Step 2: Navigate to Health & Failure Risk view
+        health_nav_btn = page.locator('button', has_text='Health & Failure Risk').first
+        health_nav_btn.wait_for(state="visible", timeout=10000)
+        health_nav_btn.click()
+        page.wait_for_timeout(1500)
+
+        # Step 3: Verify AI Diagnostic Assistant card presence
+        ai_card = page.locator('[data-testid="ai-diagnostic-assistant-card"]')
+        ai_card.wait_for(state="visible", timeout=10000)
+        assert "SentinelAI Diagnostic Assistant" in ai_card.inner_text()
+
+        # Check model badge and status badge
+        model_badge = page.locator('[data-testid="ai-model-badge"]')
+        model_badge.wait_for(state="visible", timeout=5000)
+        assert len(model_badge.inner_text().strip()) > 0
+
+        status_badge = page.locator('[data-testid="ai-status-badge"]')
+        status_badge.wait_for(state="visible", timeout=5000)
+        assert ("Active" in status_badge.inner_text() or "Fallback" in status_badge.inner_text())
+
+        # Check Generate button
+        gen_btn = page.locator('[data-testid="generate-ai-diagnosis-button"]')
+        gen_btn.wait_for(state="visible", timeout=5000)
+        assert gen_btn.is_enabled()
+
+        # Step 4: Test Successful Live-Model Diagnosis via route mock
+        mock_diagnosis = {
+            "incident_id": "diag_test_live_4492",
+            "timestamp": "2026-10-26T16:50:00Z",
+            "status": "ANOMALY_EVALUATED",
+            "risk_category": "Critical",
+            "health_score": 38.5,
+            "anomaly_score": 0.8842,
+            "incident_summary": "Sustained high compute saturation and memory pressure detected on primary host.",
+            "probable_causes": [
+                {
+                    "rank": 1,
+                    "hypothesis": "Runaway worker process consuming excessive CPU threads and heap memory.",
+                    "confidence": "HIGH",
+                    "supporting_evidence": [
+                        "CPU utilization sustained > 94.5% for 6 consecutive windows.",
+                        "Memory saturation exceeded 88.2% with active page thrashing.",
+                    ],
+                },
+                {
+                    "rank": 2,
+                    "hypothesis": "I/O bottleneck caused by unindexed database logging query.",
+                    "confidence": "MEDIUM",
+                    "supporting_evidence": ["Disk write latency spiked to 45ms."],
+                },
+            ],
+            "investigation_steps": [
+                "Inspect top CPU consumers via top/htop or Task Manager.",
+                "Verify recent application query traces and database slow query log.",
+                "Review system syslog and dmesg for out-of-memory kernel events.",
+            ],
+            "remediation_actions": [
+                {
+                    "step_number": 1,
+                    "action": "Throttle runaway telemetry polling batch worker.",
+                    "command": "systemctl restart sentinel-worker.service",
+                    "safety_level": "CAUTION",
+                    "precautions": "Ensure existing pipeline batch buffer flushes before restart.",
+                },
+                {
+                    "step_number": 2,
+                    "action": "Inspect process table for zombie worker PIDs.",
+                    "command": "ps aux --sort=-%cpu | head -n 10",
+                    "safety_level": "SAFE",
+                    "precautions": "Read-only inspection command; non-destructive.",
+                },
+            ],
+            "uncertainty_assessment": "Diagnostic conclusions are bounded by host telemetry metrics. Network socket buffer queues were not directly observed.",
+            "is_fallback": False,
+            "model_used": "gemma-4-26b-a4b-it",
+            "latency_ms": 1420.5,
+            "metadata": {},
+        }
+
+        page.route(
+            "**/api/ai/diagnose",
+            lambda route: route.fulfill(status=200, content_type="application/json", json=mock_diagnosis),
+        )
+
+        # Trigger generation
+        gen_btn.click()
+
+        # Step 5: Verify Rendered Live Diagnosis
+        summary_elem = page.locator('[data-testid="ai-incident-summary"]', has_text="Sustained high compute saturation")
+        summary_elem.wait_for(state="visible", timeout=10000)
+        assert "Sustained high compute saturation" in summary_elem.inner_text()
+
+        # Verify Authoritative ML Scores Row
+        scores_row = page.locator('[data-testid="ai-scores-row"]')
+        assert "Critical" in scores_row.inner_text()
+        assert "0.8842" in scores_row.inner_text()
+        assert "38.5/100" in scores_row.inner_text()
+
+        # Verify Source Badge
+        src_badge = page.locator('[data-testid="diagnosis-source-badge"]')
+        assert "AI-POWERED DIAGNOSIS" in src_badge.inner_text()
+        assert "GEMMA-4-26B-A4B-IT" in src_badge.inner_text()
+
+        # Verify Latency Badge
+        latency_badge = page.locator('[data-testid="diagnosis-latency-badge"]')
+        assert "1420.5ms" in latency_badge.inner_text()
+
+        # Verify Mandatory Human Review Safety Banner
+        safety_banner = page.locator('[data-testid="mandatory-human-review-banner"]')
+        assert safety_banner.is_visible()
+        assert "Mandatory Operator Review Required" in safety_banner.inner_text()
+        assert "Autonomous command execution is permanently disabled" in safety_banner.inner_text()
+
+        # Verify Probable Causes
+        causes_section = page.locator('[data-testid="ai-probable-causes-section"]')
+        assert causes_section.is_visible()
+        assert "Cause #1: Runaway worker process" in causes_section.inner_text()
+        assert "HIGH CONFIDENCE" in causes_section.inner_text()
+        assert "CPU utilization sustained > 94.5%" in causes_section.inner_text()
+
+        # Verify Investigation Steps
+        inv_section = page.locator('[data-testid="ai-investigation-steps-section"]')
+        assert inv_section.is_visible()
+        assert "Inspect top CPU consumers" in inv_section.inner_text()
+
+        # Verify Remediation Runbook with Command
+        rem_section = page.locator('[data-testid="ai-remediation-runbook-section"]')
+        assert rem_section.is_visible()
+        assert "Step 1: Throttle runaway telemetry polling" in rem_section.inner_text()
+        assert "systemctl restart sentinel-worker.service" in rem_section.inner_text()
+        assert "Manual review required" in rem_section.inner_text()
+        assert "CAUTION" in rem_section.inner_text()
+
+        # Verify Uncertainty Assessment
+        unc_section = page.locator('[data-testid="ai-uncertainty-assessment"]')
+        assert unc_section.is_visible()
+        assert "Diagnostic conclusions are bounded by host telemetry metrics" in unc_section.inner_text()
+
+        # Step 6: Test Deterministic Fallback State Display
+        mock_fallback = dict(mock_diagnosis)
+        mock_fallback["is_fallback"] = True
+        mock_fallback["model_used"] = "heuristic_fallback"
+        mock_fallback["latency_ms"] = 12.3
+
+        page.unroute("**/api/ai/diagnose")
+        page.route("**/api/ai/diagnose", lambda r: r.fulfill(status=200, content_type="application/json", json=mock_fallback))
+
+        gen_btn.click()
+        page.wait_for_timeout(500)
+
+        fallback_badge = page.locator('[data-testid="diagnosis-source-badge"]')
+        fallback_badge.wait_for(state="visible", timeout=3000)
+        assert "DETERMINISTIC FALLBACK" in fallback_badge.inner_text()
+
+        # Step 7: Test API Error Handling & Retry State
+        page.unroute("**/api/ai/diagnose")
+        page.route("**/api/ai/diagnose", lambda r: r.fulfill(status=500, content_type="application/json", json={"detail": "Gemma AI service connection failed"}))
+
+        gen_btn.click()
+        error_state = page.locator('[data-testid="ai-error-state"]')
+        error_state.wait_for(state="visible", timeout=3000)
+        assert error_state.is_visible()
+        assert "Gemma AI service connection failed" in error_state.inner_text()
+
+        retry_btn = page.locator('[data-testid="ai-retry-button"]')
+        assert retry_btn.is_visible()
+
+        # Clean up route mocks
+        page.unroute("**/api/ai/diagnose")
+
+        # Capture React AI Diagnostic Assistant screenshot
+        react_screenshot = SCREENSHOT_DIR / "12_react_ai_diagnostic_assistant.png"
+        page.screenshot(path=str(react_screenshot), full_page=False)
+        assert react_screenshot.exists()

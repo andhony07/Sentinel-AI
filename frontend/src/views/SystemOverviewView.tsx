@@ -73,7 +73,7 @@ export const SystemOverviewView: React.FC = () => {
       <ErrorState
         title="Failed to Load System Overview"
         message={error}
-        detail="Ensure the FastAPI server is running on http://127.0.0.1:8000"
+        detail="Ensure the FastAPI server is running on http://127.0.0.1:8081"
         onRetry={fetchData}
         height={300}
       />
@@ -190,7 +190,7 @@ export const SystemOverviewView: React.FC = () => {
           subtext={
             <span>
               {metric?.disk_read_bytes_per_sec !== null && metric?.disk_read_bytes_per_sec !== undefined
-                ? `R ${(metric.disk_read_bytes_per_sec / (1024 * 1024)).toFixed(1)} MB/s · W ${((metric.disk_write_bytes_per_sec ?? 0) / (1024 * 1024)).toFixed(1)} MB/s`
+                ? `R ${(metric.disk_read_bytes_per_sec / (1024 * 1024)).toFixed(1)} MB/s Â· W ${((metric.disk_write_bytes_per_sec ?? 0) / (1024 * 1024)).toFixed(1)} MB/s`
                 : 'Physical drive busy time'}
             </span>
           }
@@ -201,7 +201,7 @@ export const SystemOverviewView: React.FC = () => {
           value={netRecvSec}
           unit="KB/s"
           icon={<Network size={16} />}
-          subtext={<span>↑ {netSentSec} KB/s upload</span>}
+          subtext={<span>â†‘ {netSentSec} KB/s upload</span>}
         />
       </div>
 
@@ -363,7 +363,7 @@ export const SystemOverviewView: React.FC = () => {
                     {metric.top_process_name}
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                    PID: {metric.top_process_pid ?? 'N/A'} • Total Processes: {metric.process_count ?? 'N/A'}
+                    PID: {metric.top_process_pid ?? 'N/A'} â€¢ Total Processes: {metric.process_count ?? 'N/A'}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -473,7 +473,7 @@ export const SystemOverviewView: React.FC = () => {
                         {r.memory_percent !== null ? `${r.memory_percent.toFixed(1)}%` : '--'}
                       </td>
                       <td>{r.disk_percent !== null ? `${r.disk_percent.toFixed(1)}%` : '--'}</td>
-                      <td>↓ {netRecv} / ↑ {netSent}</td>
+                      <td>â†“ {netRecv} / â†‘ {netSent}</td>
                       <td style={{ color: 'var(--accent-primary)', fontWeight: 500 }}>
                         {r.top_process_name ?? '--'}
                       </td>

@@ -58,3 +58,47 @@ def reset_dashboard_service(new_service: Optional[DashboardService] = None) -> N
     global _service_instance
     with _service_lock:
         _service_instance = new_service
+
+
+_ai_service_instance: Optional[Any] = None
+_ai_service_lock = threading.Lock()
+
+
+def get_ai_diagnostic_service(
+    settings: Settings = Depends(get_api_settings),
+    dashboard_service: DashboardService = Depends(get_dashboard_service),
+) -> Any:
+    """Provide a shared AIDiagnosticService instance.
+
+    Thread-safe lazy initialization ensures a single AI diagnostic service coordinator
+    is reused across API requests within the server process.
+
+    Args:
+        settings: Injected or resolved Settings instance.
+        dashboard_service: Injected DashboardService instance.
+
+    Returns:
+        Configured AIDiagnosticService instance.
+    """
+    from app.ai.service import AIDiagnosticService
+
+    global _ai_service_instance
+    with _ai_service_lock:
+        if _ai_service_instance is None:
+            active_settings = settings if isinstance(settings, Settings) else get_api_settings()
+            _ai_service_instance = AIDiagnosticService(
+                settings=active_settings,
+                dashboard_service=dashboard_service,
+            )
+        return _ai_service_instance
+
+
+def reset_ai_diagnostic_service(new_service: Optional[Any] = None) -> None:
+    """Reset or override the global AI service coordinator (primarily for testing).
+
+    Args:
+        new_service: Optional custom AIDiagnosticService to inject.
+    """
+    global _ai_service_instance
+    with _ai_service_lock:
+        _ai_service_instance = new_service

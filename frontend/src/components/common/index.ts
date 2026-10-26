@@ -6,3 +6,4 @@ export * from './LoadingState';
 export * from './ErrorState';
 export * from './EmptyState';
 export * from './Button';
+export * from './AIDiagnosticCard';

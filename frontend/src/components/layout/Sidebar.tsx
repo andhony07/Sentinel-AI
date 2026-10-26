@@ -56,12 +56,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'health',
-      label: 'Health & Risk Analysis',
+      label: 'Health & Failure Risk',
       icon: <ShieldCheck size={18} />,
     },
     {
       id: 'simulation',
-      label: 'Anomaly Simulation',
+      label: 'Anomaly Simulation Lab',
       icon: <FlaskConical size={18} />,
     },
     {
@@ -71,17 +71,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'history',
-      label: 'Historical Telemetry',
+      label: 'Telemetry History',
       icon: <History size={18} />,
     },
     {
       id: 'anomalies',
-      label: 'Anomaly Audit Log',
+      label: 'Incident & Audit Trail',
       icon: <AlertOctagon size={18} />,
     },
     {
       id: 'database',
-      label: 'Database & Status',
+      label: 'System Operations',
       icon: <Database size={18} />,
     },
   ];
@@ -146,7 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     letterSpacing: 0.5,
                   }}
                 >
-                  Operations Center
+                  Infrastructure Console
                 </span>
               </div>
               <h1
@@ -163,7 +163,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
               >
                 <Cpu size={16} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-                Server Health AI
+                SentinelAI
               </h1>
             </div>
           ) : (
@@ -180,7 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   justifyContent: 'center',
                   color: 'var(--accent-primary)',
                 }}
-                title="Server Health AI"
+                title="SentinelAI"
               >
                 <Cpu size={18} />
               </div>
@@ -382,7 +382,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748B', fontSize: 10 }}>
-                <span>API :8000</span>
+                <span>API :8081</span>
                 <span>Vite :5173</span>
                 <span>Streamlit :8501</span>
               </div>

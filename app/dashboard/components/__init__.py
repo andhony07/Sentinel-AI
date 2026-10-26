@@ -1,5 +1,6 @@
 """Dashboard visual components package."""
 
+from app.dashboard.components.ai_diagnostic_card import render_ai_diagnostic_card
 from app.dashboard.components.diagnostic_card import render_diagnostic_report
 from app.dashboard.components.health_card import render_health_and_risk
 from app.dashboard.components.metrics_cards import (
@@ -14,5 +15,6 @@ __all__ = [
     "adapt_telemetry_to_record",
     "render_health_and_risk",
     "render_diagnostic_report",
+    "render_ai_diagnostic_card",
 ]
 

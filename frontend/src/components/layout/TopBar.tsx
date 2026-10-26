@@ -35,11 +35,11 @@ const VIEW_TITLES: Record<ViewType, { title: string; subtitle: string }> = {
     subtitle: 'Unified host resource metrics, ML risk evaluation, and hardware telemetry',
   },
   health: {
-    title: 'Health & Risk Analysis',
-    subtitle: 'Deterministic 0–100 health scoring, Isolation Forest inference, and explainable root-cause evidence',
+    title: 'Health & Failure Risk',
+    subtitle: 'Deterministic 0â€“100 health scoring, Isolation Forest inference, and explainable root-cause evidence',
   },
   simulation: {
-    title: 'Anomaly Simulation Studio',
+    title: 'Anomaly Simulation Lab',
     subtitle: 'Deterministic synthetic failure injection and end-to-end pipeline diagnosis',
   },
   realtime: {
@@ -47,15 +47,15 @@ const VIEW_TITLES: Record<ViewType, { title: string; subtitle: string }> = {
     subtitle: 'Continuous hardware telemetry streaming with sub-second polling and process inspection',
   },
   history: {
-    title: 'Historical Telemetry',
+    title: 'Telemetry History',
     subtitle: 'Chronological time-series ledger with temporal filters and RFC-4180 CSV export',
   },
   anomalies: {
-    title: 'Anomaly Audit Log',
+    title: 'Incident & Audit Trail',
     subtitle: 'Historical anomaly evaluation records scored against Isolation Forest decision boundaries',
   },
   database: {
-    title: 'Database & Operational Status',
+    title: 'System Operations',
     subtitle: 'SQLite physical storage summary, subsystem integrity, and validation audit logs',
   },
 };

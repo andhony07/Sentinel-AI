@@ -27,6 +27,7 @@ from app.dashboard.charts.builders import (
     build_resource_breakdown_bar,
     build_simulation_comparison_bar,
 )
+from app.dashboard.components.ai_diagnostic_card import render_ai_diagnostic_card
 from app.dashboard.components.diagnostic_card import render_diagnostic_report
 from app.dashboard.components.health_card import render_health_and_risk
 from app.dashboard.components.metrics_cards import render_metric_cards
@@ -46,8 +47,8 @@ def configure_page() -> None:
     """Configure Streamlit page title and layout safely."""
     try:
         st.set_page_config(
-            page_title="Server Health & Failure Risk Monitor",
-            page_icon="🖥️",
+            page_title="SentinelAI â€” Intelligent Infrastructure Monitoring",
+            page_icon="ðŸ›¡ï¸",
             layout="wide",
             initial_sidebar_state="expanded",
         )
@@ -77,17 +78,18 @@ def main() -> None:
     # Sidebar: Product Identity, Navigation & Live Operational Controls
     # -------------------------------------------------------------------------
     with st.sidebar:
-        # Product Identity Area
+        # Product Identity Area - SentinelAI Canonical Identity
         st.markdown(
             """<div style="padding: 4px 0 14px 0; border-bottom: 1px solid #293548; margin-bottom: 14px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                    <span style="background: rgba(56, 189, 248, 0.16); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 800; letter-spacing: 0.8px;">AIOPS</span>
-                    <span style="font-size: 11px; color: #94A3B8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Operations Center</span>
+                    <span style="background: rgba(56, 189, 248, 0.16); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 800; letter-spacing: 0.8px;">ðŸ›¡ï¸ SENTINELAI</span>
+                    <span style="font-size: 11px; color: #94A3B8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Infrastructure Console</span>
                 </div>
                 <h3 style="margin: 0 0 2px 0; font-size: 16px; font-weight: 700; color: #F8FAFC; letter-spacing: -0.3px; line-height: 1.3;">
-                    AI Based Server Health Monitoring
+                    SentinelAI
                 </h3>
-                <p style="margin: 0; font-size: 11px; color: #64748B;">Telemetry Inference &amp; Failure Risk</p>
+                <p style="margin: 0; font-size: 11px; color: #38BDF8; font-weight: 600;">Intelligent Infrastructure Monitoring</p>
+                <p style="margin: 2px 0 0 0; font-size: 10px; color: #64748B;">Predictive Health &amp; Incident Intelligence</p>
             </div>""",
             unsafe_allow_html=True,
         )
@@ -97,13 +99,13 @@ def main() -> None:
         page = st.radio(
             label="Select View",
             options=[
-                "📊 System Overview",
-                "🛡️ Health & Risk Analysis",
-                "🧪 Anomaly Simulation",
-                "⚡ Real-Time Monitoring",
-                "📈 Historical Telemetry",
-                "🔍 Anomaly Audit Log",
-                "🗄️ Database & Operational Status",
+                "ðŸ“Š System Overview",
+                "ðŸ›¡ï¸ Health & Failure Risk",
+                "ðŸ§ª Anomaly Simulation Lab",
+                "âš¡ Real-Time Monitoring",
+                "ðŸ“ˆ Telemetry History",
+                "ðŸ” Incident & Audit Trail",
+                "ðŸ—„ï¸ System Operations",
             ],
             index=0,
             label_visibility="collapsed",
@@ -113,7 +115,7 @@ def main() -> None:
         st.markdown("<div style='font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px;'>Live Controls</div>", unsafe_allow_html=True)
 
         # Snapshot button
-        if st.button("📸 Capture Live Snapshot", width="stretch", type="primary"):
+        if st.button("ðŸ“¸ Capture Live Snapshot", width="stretch", type="primary"):
             with st.spinner("Capturing live telemetry sample..."):
                 _, pred, err = service.capture_live_snapshot(persist=True)
                 if err:
@@ -125,12 +127,12 @@ def main() -> None:
         # Background monitoring toggle
         is_bg_running = service.is_background_monitoring_running()
         if is_bg_running:
-            if st.button("⏹️ Stop Background Worker", width="stretch"):
+            if st.button("â¹ï¸ Stop Background Worker", width="stretch"):
                 service.stop_background_monitoring()
                 st.info("Stopped background monitoring thread.")
                 st.rerun()
         else:
-            if st.button("▶️ Start Background Worker", width="stretch"):
+            if st.button("â–¶ï¸ Start Background Worker", width="stretch"):
                 service.start_background_monitoring()
                 st.success("Started background monitoring thread.")
                 st.rerun()
@@ -146,7 +148,7 @@ def main() -> None:
             disabled=not auto_refresh,
         )
 
-        if st.button("🔄 Refresh Now", width="stretch"):
+        if st.button("ðŸ”„ Refresh Now", width="stretch"):
             st.rerun()
 
         st.markdown("<hr style='margin:14px 0; border:none; border-top:1px solid #293548;'>", unsafe_allow_html=True)
@@ -157,8 +159,9 @@ def main() -> None:
 
         st.markdown("<div style='font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px;'>Runtime &amp; Storage Engine</div>", unsafe_allow_html=True)
         st.caption(f"**ML Engine:** `{model_name}`")
-        st.caption(f"**ML Status:** {'🟢 Trained Artifact' if is_model_trained else '⚠️ Heuristic Baseline'}")
-        st.caption(f"**Collector Worker:** {'🟢 Active' if is_bg_running else '⚪ Idle'}")
+        st.caption(f"**ML Status:** {'ðŸŸ¢ Trained Artifact' if is_model_trained else 'âš ï¸ Heuristic Baseline'}")
+        st.caption(f"**AI Engine:** `{settings.ai_model_name}` ({'ðŸŸ¢ Enabled' if settings.ai_enabled else 'âšª Disabled'})")
+        st.caption(f"**Collector Worker:** {'ðŸŸ¢ Active' if is_bg_running else 'âšª Idle'}")
         st.caption(f"**SQLite Persistence:** `{summary['counts']['system_metrics']:,}` samples")
 
     # Dark mode is the sole user-facing theme for this AIOps Command Center redesign
@@ -191,7 +194,7 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page 1: System Overview
     # -------------------------------------------------------------------------
-    if page == "📊 System Overview":
+    if page in ("ðŸ“Š System Overview", "ðŸ“Š Overview"):
         # Section Header
         st.markdown(
             f"""<div style='margin-bottom:14px;'>
@@ -220,8 +223,8 @@ def main() -> None:
                 st.plotly_chart(fig_bar, width="stretch")
             else:
                 st.markdown(
-                    f"""<div class="aiops-empty-state">
-                        <div style="font-size:24px;">📊</div>
+                    f"""<div class="sentinel-empty-state aiops-empty-state">
+                        <div style="font-size:24px;">ðŸ“Š</div>
                         <div class="title">Resource Saturation Unavailable</div>
                         <div class="desc">No active telemetry readings have been recorded. Click "Capture Live Snapshot" in the sidebar to acquire initial hardware readings.</div>
                     </div>""",
@@ -237,7 +240,7 @@ def main() -> None:
             if latest_pred is not None:
                 badge = get_theme_risk_badge(latest_pred.risk_category, theme="dark")
                 health_val = f"{latest_pred.health_score:.1f} / 100" if latest_pred.health_score is not None else "N/A"
-                decision_status = "⚠️ Statistical Outlier" if latest_pred.is_anomaly else "🟢 Nominal Cluster"
+                decision_status = "âš ï¸ Statistical Outlier" if latest_pred.is_anomaly else "ðŸŸ¢ Nominal Cluster"
                 decision_color = tokens.color_critical if latest_pred.is_anomaly else tokens.color_normal
 
                 warning_html = ""
@@ -288,8 +291,8 @@ def main() -> None:
                 st.markdown(overview_card_html, unsafe_allow_html=True)
             else:
                 st.markdown(
-                    f"""<div class="aiops-empty-state">
-                        <div style="font-size:24px;">🛡️</div>
+                    f"""<div class="sentinel-empty-state aiops-empty-state">
+                        <div style="font-size:24px;">ðŸ›¡ï¸</div>
                         <div class="title">Health Evaluation Unavailable</div>
                         <div class="desc">No machine learning health predictions have been evaluated yet. Click "Capture Live Snapshot" in the sidebar to run ML inference.</div>
                     </div>""",
@@ -324,8 +327,8 @@ def main() -> None:
             st.dataframe(df_recent, width="stretch", hide_index=True)
         else:
             st.markdown(
-                f"""<div class="aiops-empty-state">
-                    <div style="font-size:24px;">🗄️</div>
+                f"""<div class="sentinel-empty-state aiops-empty-state">
+                    <div style="font-size:24px;">ðŸ—„ï¸</div>
                     <div class="title">No Ingestion Records Found</div>
                     <div class="desc">No recent telemetry samples have been persisted into SQLite yet.</div>
                 </div>""",
@@ -335,13 +338,13 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page 2: Health & Risk Analysis
     # -------------------------------------------------------------------------
-    elif page == "🛡️ Health & Risk Analysis":
+    elif page in ("ðŸ›¡ï¸ Health & Failure Risk", "ðŸ›¡ï¸ Health & Risk Analysis"):
         # Section Header
         st.markdown(
             (
                 f"<div style='margin-bottom:14px;'>"
-                f"<h3 style='margin:0 0 4px 0; font-size:18px; font-weight:700; color:{tokens.text_primary};'>Health &amp; Risk Command Center</h3>"
-                f"<p style='margin:0; font-size:12px; color:{tokens.text_secondary};'>Real-time composite health scoring, unsupervised anomaly boundary evaluation, multi-tier risk taxonomy, and explainable root-cause diagnostics</p>"
+                f"<h3 style='margin:0 0 4px 0; font-size:18px; font-weight:700; color:{tokens.text_primary};'>Health &amp; Failure Risk Analysis</h3>"
+                f"<p style='margin:0; font-size:12px; color:{tokens.text_secondary};'>Deterministic multi-signal health deductions, empirical anomaly inference, and automated remediation runbooks</p>"
                 f"</div>"
             ),
             unsafe_allow_html=True,
@@ -353,7 +356,7 @@ def main() -> None:
             health_str = f"{latest_pred.health_score:.1f}" if latest_pred.health_score is not None else "N/A"
             health_color = badge["color"]
             anomaly_str = f"{latest_pred.anomaly_score:.4f}"
-            anomaly_status = "⚠️ Outlier Detected" if latest_pred.is_anomaly else "🟢 Nominal Baseline"
+            anomaly_status = "âš ï¸ Outlier Detected" if latest_pred.is_anomaly else "ðŸŸ¢ Nominal Baseline"
             anomaly_status_color = tokens.color_critical if latest_pred.is_anomaly else tokens.color_normal
 
             # Telemetry indicators
@@ -440,7 +443,7 @@ def main() -> None:
             st.markdown(
                 (
                     f"<div class=\"aiops-empty-state\" style='margin-bottom:16px;'>"
-                    f"<div style=\"font-size:24px;\">🛡️</div>"
+                    f"<div style=\"font-size:24px;\">ðŸ›¡ï¸</div>"
                     f"<div class=\"title\">Executive Health Evaluation Unavailable</div>"
                     f"<div class=\"desc\">No active machine learning inference record found. Ingest live telemetry or trigger an anomaly simulation to compute composite health and failure risk.</div>"
                     f"</div>"
@@ -468,7 +471,7 @@ def main() -> None:
             ("Low", "0.35 - 0.55", "65 - 79", "#38BDF8", "Mild metric variance; well within normal parameters."),
             ("Moderate", "0.55 - 0.75", "45 - 64", "#F59E0B", "Noticeable divergence from normal baseline cluster."),
             ("High", "0.75 - 0.90", "25 - 44", "#F97316", "Significant behavioral outlier; review workload/processes."),
-            ("Critical", "≥ 0.90", "0 - 24", "#EF4444", "Severe anomaly or hardware saturation ≥95%."),
+            ("Critical", "â‰¥ 0.90", "0 - 24", "#EF4444", "Severe anomaly or hardware saturation â‰¥95%."),
         ]
 
         active_cat = latest_pred.risk_category.value if latest_pred else ""
@@ -490,7 +493,7 @@ def main() -> None:
                     f"<div style='border:{border_style}; background-color:{bg_style}; {shadow_style} padding:14px; border-radius:8px; height:185px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between;'>"
                     f"<div>"
                     f"<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;'>"
-                    f"<span style='color:{col}; font-size:14px; font-weight:800; display:flex; align-items:center; gap:4px;'>● {name}</span>"
+                    f"<span style='color:{col}; font-size:14px; font-weight:800; display:flex; align-items:center; gap:4px;'>â— {name}</span>"
                     f"{active_badge}"
                     f"</div>"
                     f"<div style='font-size:11px; color:{tokens.text_secondary}; margin-top:4px;'><b>Anomaly:</b> <span style='color:{tokens.text_primary}; font-variant-numeric:tabular-nums;'>{thresh}</span></div>"
@@ -505,10 +508,40 @@ def main() -> None:
         diag_report = service.get_diagnostics_for_latest()
         render_diagnostic_report(diag_report, theme="dark")
 
+        # ---------------------------------------------------------------------
+        # AI Diagnostic Assistant (SentinelAI)
+        # ---------------------------------------------------------------------
+        st.markdown("<div style='margin-top:24px;'></div>", unsafe_allow_html=True)
+        st.markdown("#### ðŸ¤– SentinelAI Diagnostic Assistant")
+        st.caption("Synthesizes live telemetry, top processes, and ML anomaly evaluations into an evidence-grounded incident runbook.")
+
+        col_ai_btn, col_ai_info = st.columns([1.5, 3.0])
+        with col_ai_btn:
+            if st.button("ðŸ§  Generate AI Diagnosis", key="btn_gen_ai_diag", type="primary"):
+                provider_desc = "Gemma 4 via Gemini API" if service.settings.ai_provider == "gemma" else "AI assistant"
+                with st.spinner(f"Synthesizing telemetry with {provider_desc} (automatic fallback on timeout)..."):
+                    ai_diag = service.ai_service.diagnose_latest_sync()
+                    st.session_state["latest_ai_diagnosis"] = ai_diag
+
+        with col_ai_info:
+            ai_status_text = "ðŸŸ¢ Active" if service.settings.ai_enabled else "âšª Disabled"
+            provider_title = "Google Gemma 4" if service.settings.ai_provider == "gemma" else service.settings.ai_provider.upper()
+            st.markdown(
+                f"<div style='font-size:11px; color:#94A3B8; padding-top:4px;'>"
+                f"Model: <code>{service.settings.ai_model_name}</code> &bull; Provider: <b>{provider_title}</b> &bull; "
+                f"Status: <b>{ai_status_text}</b> &bull; Fallback: <b>Deterministic Heuristics Ready</b><br>"
+                f"<span style='font-size:10px; color:#64748B;'>Google Gemini API inference. Instant deterministic fallback engages if Gemma is unreachable or unconfigured.</span>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+        cached_ai = st.session_state.get("latest_ai_diagnosis") or service.ai_service.get_cached_latest()
+        render_ai_diagnostic_card(cached_ai, theme="dark")
+
     # -------------------------------------------------------------------------
     # Page: Anomaly Simulation
     # -------------------------------------------------------------------------
-    elif page == "🧪 Anomaly Simulation":
+    elif page in ("ðŸ§ª Anomaly Simulation Lab", "ðŸ§ª Anomaly Simulation"):
         st.markdown(
             '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">'
             '<div>'
@@ -527,7 +560,7 @@ def main() -> None:
 
         with col_scen:
             scenarios = list(SCENARIO_PROFILES.keys())
-            scenario_labels = [f"{SCENARIO_PROFILES[s].name} — ({SCENARIO_PROFILES[s].stress_subsystem})" for s in scenarios]
+            scenario_labels = [f"{SCENARIO_PROFILES[s].name} â€” ({SCENARIO_PROFILES[s].stress_subsystem})" for s in scenarios]
             selected_idx = st.selectbox(
                 "Select Deterministic Anomaly Scenario Profile",
                 options=range(len(scenarios)),
@@ -542,7 +575,7 @@ def main() -> None:
             outlier_color = "#EF4444" if profile.is_anomaly_expected else "#10B981"
 
             dossier_html = (
-                f'<div class="aiops-metric-card" style="margin-top:8px; border-left:3px solid #38BDF8;">'
+                f'<div class="sentinel-card aiops-metric-card" style="margin-top:8px; border-left:3px solid #38BDF8;">'
                 f'<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">'
                 f'<span style="font-size:11px; font-weight:700; color:#38BDF8; text-transform:uppercase; letter-spacing:0.6px;">Scenario Profile Dossier</span>'
                 f'<span style="font-size:11px; color:#94A3B8; background:#111827; padding:2px 7px; border-radius:3px; border:1px solid #293548;">Target: {profile.stress_subsystem}</span>'
@@ -563,7 +596,7 @@ def main() -> None:
             )
             sim_seed = st.number_input("Deterministic Random Seed", min_value=1, max_value=99999, value=42, step=1)
             persist_sim = st.checkbox("Commit Sample to SQLite", value=False, help="Persist the generated telemetry and 39-feature vector into the database.")
-            run_sim = st.button("🚀 Run Anomaly Simulation", type="primary", width="stretch")
+            run_sim = st.button("ðŸš€ Run Anomaly Simulation", type="primary", width="stretch")
 
         if run_sim or "last_sim_result" in st.session_state:
             if run_sim:
@@ -592,7 +625,7 @@ def main() -> None:
             status_accent = "#EF4444" if pred.is_anomaly else "#10B981"
 
             banner_html = (
-                f'<div class="aiops-metric-card" style="border-left:4px solid {status_accent}; margin-bottom:16px;">'
+                f'<div class="sentinel-card aiops-metric-card" style="border-left:4px solid {status_accent}; margin-bottom:16px;">'
                 f'<div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">'
                 f'<div>'
                 f'<div style="font-size:11px; font-weight:700; color:{status_accent}; text-transform:uppercase; letter-spacing:0.8px;">Execution Assessment &bull; {status_text}</div>'
@@ -633,7 +666,7 @@ def main() -> None:
             col_d1, col_d2, col_d3, col_d4 = st.columns(4)
             with col_d1:
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">CPU Utilization</div>'
                     f'<div style="font-size:20px; font-weight:700; color:#F8FAFC; margin-top:2px;">{sim_res.metrics.cpu.utilization_percent:.1f}%</div>'
                     f'<div style="font-size:11px; color:{"#EF4444" if d_cpu > 0 else "#10B981"}; margin-top:2px;">{"+" if d_cpu > 0 else ""}{d_cpu:.1f}% vs. Baseline ({baseline_metrics.cpu.utilization_percent:.1f}%)</div>'
@@ -642,7 +675,7 @@ def main() -> None:
                 )
             with col_d2:
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Memory Utilization</div>'
                     f'<div style="font-size:20px; font-weight:700; color:#F8FAFC; margin-top:2px;">{sim_res.metrics.memory.utilization_percent:.1f}%</div>'
                     f'<div style="font-size:11px; color:{"#EF4444" if d_ram > 0 else "#10B981"}; margin-top:2px;">{"+" if d_ram > 0 else ""}{d_ram:.1f}% vs. Baseline ({baseline_metrics.memory.utilization_percent:.1f}%)</div>'
@@ -651,7 +684,7 @@ def main() -> None:
                 )
             with col_d3:
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Storage Utilization</div>'
                     f'<div style="font-size:20px; font-weight:700; color:#F8FAFC; margin-top:2px;">{sim_res.metrics.disk.utilization_percent:.1f}%</div>'
                     f'<div style="font-size:11px; color:{"#EF4444" if d_disk > 0 else "#10B981"}; margin-top:2px;">{"+" if d_disk > 0 else ""}{d_disk:.1f}% vs. Baseline ({baseline_metrics.disk.utilization_percent:.1f}%)</div>'
@@ -660,7 +693,7 @@ def main() -> None:
                 )
             with col_d4:
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Network Egress</div>'
                     f'<div style="font-size:20px; font-weight:700; color:#F8FAFC; margin-top:2px;">{(sim_res.metrics.network.bytes_sent_per_sec / 1024):,.1f} <span style="font-size:12px; color:#94A3B8;">KB/s</span></div>'
                     f'<div style="font-size:11px; color:{"#EF4444" if d_net_tx > 0 else "#10B981"}; margin-top:2px;">{"+" if d_net_tx > 0 else ""}{d_net_tx:,.1f} KB/s vs. Baseline</div>'
@@ -687,10 +720,38 @@ def main() -> None:
             st.markdown("#### 3. Explainable Diagnostic Recommendations")
             render_diagnostic_report(sim_diag, theme="dark")
 
+            # 4. SentinelAI Incident Runbook & Diagnosis
+            st.markdown("<div style='margin-top:24px;'></div>", unsafe_allow_html=True)
+            st.markdown("#### 4. SentinelAI Incident Runbook &amp; Diagnosis")
+            col_sim_ai, col_sim_info = st.columns([1.8, 2.5])
+            with col_sim_ai:
+                if st.button("ðŸ§  Generate AI Diagnosis for Scenario", key=f"btn_sim_ai_{selected_scenario.value}"):
+                    with st.spinner("Synthesizing simulation telemetry into AI runbook (CPU inference ~45â€“75s; automatic fallback on timeout)..."):
+                        sim_ai_diag = service.ai_service.diagnose_simulation_sync(
+                            scenario=selected_scenario,
+                            persist=False,
+                            seed=42,
+                            **custom_overrides,
+                        )
+                        st.session_state[f"sim_ai_diag_{selected_scenario.value}"] = sim_ai_diag
+
+            with col_sim_info:
+                st.markdown(
+                    f"<div style='font-size:11px; color:#94A3B8; padding-top:4px;'>"
+                    f"Model: <code>{service.settings.ai_model_name}</code> &bull; Fallback: <b>Ready</b><br>"
+                    f"<span style='font-size:10px; color:#64748B;'>Evaluates synthetic scenario without physical hardware stress.</span>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+            cached_sim_ai = st.session_state.get(f"sim_ai_diag_{selected_scenario.value}")
+            if cached_sim_ai:
+                render_ai_diagnostic_card(cached_sim_ai, theme="dark")
+
     # -------------------------------------------------------------------------
     # Page: Real-Time Monitoring
     # -------------------------------------------------------------------------
-    elif page == "⚡ Real-Time Monitoring":
+    elif page in ("âš¡ Real-Time Monitoring",):
         st.markdown(
             '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">'
             '<div>'
@@ -711,46 +772,46 @@ def main() -> None:
             is_running = service.is_background_monitoring_running()
             if is_running:
                 st.markdown(
-                    '<div class="aiops-metric-card" style="border-left: 3px solid #10B981; margin-bottom: 10px;">'
+                    '<div class="sentinel-card aiops-metric-card" style="border-left: 3px solid #10B981; margin-bottom: 10px;">'
                     '<div style="display: flex; align-items: center; justify-content: space-between;">'
                     '<div>'
                     '<div style="font-size: 11px; font-weight: 700; color: #10B981; text-transform: uppercase; letter-spacing: 0.6px;">Collector Worker Status</div>'
-                    '<div style="font-size: 15px; font-weight: 700; color: #F8FAFC; margin-top: 2px;">🟢 ACTIVE — Ingesting Background Telemetry</div>'
+                    '<div style="font-size: 15px; font-weight: 700; color: #F8FAFC; margin-top: 2px;">ðŸŸ¢ ACTIVE â€” Ingesting Background Telemetry</div>'
                     '</div>'
                     '<span style="font-size: 11px; color: #94A3B8; background: #111827; padding: 3px 8px; border-radius: 4px; border: 1px solid #293548;">Thread Safe</span>'
                     '</div>'
                     '</div>',
                     unsafe_allow_html=True,
                 )
-                if st.button("⏹️ Stop Collector Thread", key="btn_stop_worker", width="stretch"):
+                if st.button("â¹ï¸ Stop Collector Thread", key="btn_stop_worker", width="stretch"):
                     service.stop_background_monitoring()
                     st.rerun()
             else:
                 st.markdown(
-                    '<div class="aiops-metric-card" style="border-left: 3px solid #94A3B8; margin-bottom: 10px;">'
+                    '<div class="sentinel-card aiops-metric-card" style="border-left: 3px solid #94A3B8; margin-bottom: 10px;">'
                     '<div style="display: flex; align-items: center; justify-content: space-between;">'
                     '<div>'
                     '<div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.6px;">Collector Worker Status</div>'
-                    '<div style="font-size: 15px; font-weight: 700; color: #F8FAFC; margin-top: 2px;">⚪ STOPPED — Idle / External Daemon Mode</div>'
+                    '<div style="font-size: 15px; font-weight: 700; color: #F8FAFC; margin-top: 2px;">âšª STOPPED â€” Idle / External Daemon Mode</div>'
                     '</div>'
                     '<span style="font-size: 11px; color: #94A3B8; background: #111827; padding: 3px 8px; border-radius: 4px; border: 1px solid #293548;">Standby</span>'
                     '</div>'
                     '</div>',
                     unsafe_allow_html=True,
                 )
-                if st.button("▶️ Start Collector Thread", key="btn_start_worker", type="primary", width="stretch"):
+                if st.button("â–¶ï¸ Start Collector Thread", key="btn_start_worker", type="primary", width="stretch"):
                     service.start_background_monitoring()
                     st.rerun()
 
         with col_probe:
             st.markdown(
-                '<div class="aiops-metric-card" style="margin-bottom: 10px;">'
+                '<div class="sentinel-card aiops-metric-card" style="margin-bottom: 10px;">'
                 '<div style="font-size: 11px; font-weight: 700; color: #38BDF8; text-transform: uppercase; letter-spacing: 0.6px;">Instantaneous Telemetry Probe</div>'
                 '<div style="font-size: 12px; color: #94A3B8; margin-top: 4px;">Harvest a fresh sensor snapshot across all subsystems and persist immediately to SQLite:</div>'
                 '</div>',
                 unsafe_allow_html=True,
             )
-            if st.button("⚡ Trigger Snapshot Now", key="btn_trigger_snapshot", width="stretch"):
+            if st.button("âš¡ Trigger Snapshot Now", key="btn_trigger_snapshot", width="stretch"):
                 with st.spinner("Harvesting live hardware telemetry..."):
                     rec, pred, err = service.capture_live_snapshot(persist=True)
                     if err:
@@ -773,7 +834,7 @@ def main() -> None:
             col_sc, col_an, col_rk, col_md = st.columns(4)
             with col_sc:
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Composite Health Score</div>'
                     f'<div style="font-size:22px; font-weight:700; color:#F8FAFC; margin-top:4px;">{latest_pred.health_score:.1f} <span style="font-size:12px; color:#94A3B8;">/ 100</span></div>'
                     f'</div>',
@@ -783,7 +844,7 @@ def main() -> None:
                 anom_color = "#EF4444" if latest_pred.is_anomaly else "#10B981"
                 anom_status = "OUTLIER" if latest_pred.is_anomaly else "NOMINAL"
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Anomaly Probability</div>'
                     f'<div style="font-size:22px; font-weight:700; color:{anom_color}; margin-top:4px;">{latest_pred.anomaly_score:.4f} <span style="font-size:11px; padding:2px 6px; border-radius:3px; background:rgba(255,255,255,0.06);">{anom_status}</span></div>'
                     f'</div>',
@@ -792,7 +853,7 @@ def main() -> None:
             with col_rk:
                 b = get_theme_risk_badge(latest_pred.risk_category)
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Evaluated Risk Tier</div>'
                     f'<div style="font-size:18px; font-weight:700; color:{b["color"]}; margin-top:4px;">{b["icon"]} {b["label"]}</div>'
                     f'</div>',
@@ -803,9 +864,9 @@ def main() -> None:
                 m_color = "#38BDF8" if is_trained else "#F59E0B"
                 m_label = "Isolation Forest Active" if is_trained else "Heuristic Baseline"
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Inference Pipeline</div>'
-                    f'<div style="font-size:15px; font-weight:700; color:{m_color}; margin-top:6px;">⚡ {m_label}</div>'
+                    f'<div style="font-size:15px; font-weight:700; color:{m_color}; margin-top:6px;">âš¡ {m_label}</div>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )
@@ -833,14 +894,14 @@ def main() -> None:
                     "Disk (%)": disk_str,
                     "TX (KB/s)": f"{tx_kb:,.1f}",
                     "RX (KB/s)": f"{rx_kb:,.1f}",
-                    "Dominant Process": f"{rm.top_process_name or 'N/A'} (PID: {rm.top_process_pid or '—'})",
+                    "Dominant Process": f"{rm.top_process_name or 'N/A'} (PID: {rm.top_process_pid or 'â€”'})",
                 })
             st.dataframe(table_rows, width="stretch", hide_index=True)
 
     # -------------------------------------------------------------------------
     # Page 4: Historical Telemetry
     # -------------------------------------------------------------------------
-    elif page == "📈 Historical Telemetry":
+    elif page in ("ðŸ“ˆ Telemetry History", "ðŸ“ˆ Historical Telemetry"):
         st.markdown(
             '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">'
             '<div>'
@@ -917,7 +978,7 @@ def main() -> None:
             col_s1, col_s2, col_s3, col_s4 = st.columns(4)
             with col_s1:
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Archived Records</div>'
                     f'<div style="font-size:22px; font-weight:700; color:#F8FAFC; margin-top:2px;">{len(hist_records):,} <span style="font-size:12px; color:#94A3B8;">samples</span></div>'
                     f'<div style="font-size:11px; color:#38BDF8; margin-top:2px;">Horizon: {time_range}</div>'
@@ -927,7 +988,7 @@ def main() -> None:
             with col_s2:
                 cpu_accent = "#EF4444" if peak_cpu >= 90.0 else ("#F59E0B" if peak_cpu >= 80.0 else "#10B981")
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">CPU Load Profile</div>'
                     f'<div style="font-size:22px; font-weight:700; color:#F8FAFC; margin-top:2px;">{avg_cpu:.1f}% <span style="font-size:12px; color:#94A3B8;">avg</span></div>'
                     f'<div style="font-size:11px; color:{cpu_accent}; margin-top:2px;">Peak: {peak_cpu:.1f}%</div>'
@@ -937,7 +998,7 @@ def main() -> None:
             with col_s3:
                 ram_accent = "#EF4444" if peak_ram >= 90.0 else ("#F59E0B" if peak_ram >= 80.0 else "#10B981")
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Memory Utilization</div>'
                     f'<div style="font-size:22px; font-weight:700; color:#F8FAFC; margin-top:2px;">{avg_ram:.1f}% <span style="font-size:12px; color:#94A3B8;">avg</span></div>'
                     f'<div style="font-size:11px; color:{ram_accent}; margin-top:2px;">Peak: {peak_ram:.1f}%</div>'
@@ -946,7 +1007,7 @@ def main() -> None:
                 )
             with col_s4:
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Storage Utilization</div>'
                     f'<div style="font-size:22px; font-weight:700; color:#F8FAFC; margin-top:2px;">{avg_disk:.1f}% <span style="font-size:12px; color:#94A3B8;">avg</span></div>'
                     f'<div style="font-size:11px; color:#10B981; margin-top:2px;">Filesystem Stable</div>'
@@ -965,7 +1026,7 @@ def main() -> None:
                     limit=settings.dashboard_historical_limit,
                 )
                 st.download_button(
-                    label="⬇️ Export Telemetry CSV",
+                    label="â¬‡ï¸ Export Telemetry CSV",
                     data=csv_metrics,
                     file_name=f"telemetry_metrics_{now.strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
@@ -975,7 +1036,7 @@ def main() -> None:
             fig_ts = build_multi_metric_timeseries(hist_records, selected_metrics=selected_metrics, theme="dark")
             st.plotly_chart(fig_ts, width="stretch")
 
-            with st.expander("📄 View Historical Records Table", expanded=False):
+            with st.expander("ðŸ“„ View Historical Records Table", expanded=False):
                 df_hist = pd.DataFrame(
                     [
                         {
@@ -986,8 +1047,8 @@ def main() -> None:
                             "Disk Active (%)": f"{r.disk_active_percent:.1f}%" if r.disk_active_percent is not None else "N/A",
                             "TX (KB/s)": f"{((r.network_bytes_sent_per_sec or 0.0) / 1024.0):,.1f}",
                             "RX (KB/s)": f"{((r.network_bytes_recv_per_sec or 0.0) / 1024.0):,.1f}",
-                            "Processes": r.process_count if r.process_count is not None else "—",
-                            "Top Process": f"{r.top_process_name or 'N/A'} (PID: {r.top_process_pid or '—'})",
+                            "Processes": r.process_count if r.process_count is not None else "â€”",
+                            "Top Process": f"{r.top_process_name or 'N/A'} (PID: {r.top_process_pid or 'â€”'})",
                         }
                         for r in hist_records
                     ]
@@ -995,8 +1056,8 @@ def main() -> None:
                 st.dataframe(df_hist, width="stretch", hide_index=True)
         else:
             st.markdown(
-                f"""<div class="aiops-empty-state">
-                    <div style="font-size:28px;">📈</div>
+                f"""<div class="sentinel-empty-state aiops-empty-state">
+                    <div style="font-size:28px;">ðŸ“ˆ</div>
                     <div class="title">No Historical Telemetry Recorded</div>
                     <div class="desc">No sensor telemetry was found in SQLite within the selected time window ({time_range}). Capture a live snapshot or start the background collector worker to begin logging historical telemetry.</div>
                 </div>""",
@@ -1006,7 +1067,7 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page 5: Anomaly Audit Log
     # -------------------------------------------------------------------------
-    elif page == "🔍 Anomaly Audit Log":
+    elif page in ("ðŸ” Incident & Audit Trail", "ðŸ” Anomaly Audit Log"):
         st.markdown(
             '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">'
             '<div>'
@@ -1047,7 +1108,7 @@ def main() -> None:
             col_a1, col_a2, col_a3, col_a4 = st.columns(4)
             with col_a1:
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Evaluated Vectors</div>'
                     f'<div style="font-size:22px; font-weight:700; color:#F8FAFC; margin-top:2px;">{total_eval:,} <span style="font-size:12px; color:#94A3B8;">samples</span></div>'
                     f'<div style="font-size:11px; color:#38BDF8; margin-top:2px;">Feature dimension: 39-D</div>'
@@ -1057,7 +1118,7 @@ def main() -> None:
             with col_a2:
                 outlier_color = "#EF4444" if outliers > 0 else "#10B981"
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Flagged Outliers</div>'
                     f'<div style="font-size:22px; font-weight:700; color:{outlier_color}; margin-top:2px;">{outliers:,} <span style="font-size:12px; color:#94A3B8;">({outlier_rate:.1f}%)</span></div>'
                     f'<div style="font-size:11px; color:#94A3B8; margin-top:2px;">Score &gt; 0.50 Threshold</div>'
@@ -1067,7 +1128,7 @@ def main() -> None:
             with col_a3:
                 crit_color = "#EF4444" if crit_count > 0 else "#94A3B8"
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Critical Incidents</div>'
                     f'<div style="font-size:22px; font-weight:700; color:{crit_color}; margin-top:2px;">{crit_count:,} <span style="font-size:12px; color:#94A3B8;">events</span></div>'
                     f'<div style="font-size:11px; color:#94A3B8; margin-top:2px;">Severe Saturation/Risk</div>'
@@ -1076,7 +1137,7 @@ def main() -> None:
                 )
             with col_a4:
                 st.markdown(
-                    f'<div class="aiops-metric-card">'
+                    f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">High / Moderate</div>'
                     f'<div style="font-size:22px; font-weight:700; color:#F59E0B; margin-top:2px;">{high_count + mod_count:,} <span style="font-size:12px; color:#94A3B8;">events</span></div>'
                     f'<div style="font-size:11px; color:#94A3B8; margin-top:2px;">Elevated Behavioral Shift</div>'
@@ -1110,7 +1171,7 @@ def main() -> None:
             with col_m2:
                 csv_anom = service.export_anomalies_csv(limit=limit, filter_anomalies_only=filter_anom)
                 st.download_button(
-                    label="⬇️ Export Audit Log CSV",
+                    label="â¬‡ï¸ Export Audit Log CSV",
                     data=csv_anom,
                     file_name=f"anomaly_audit_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
@@ -1122,7 +1183,7 @@ def main() -> None:
                     {
                         "Timestamp (UTC)": format_timestamp(a["timestamp"]),
                         "Anomaly Score": f"{a['anomaly_score']:.4f}",
-                        "Outlier Flag": "🔴 YES" if a["is_anomaly"] else "🟢 NO",
+                        "Outlier Flag": "ðŸ”´ YES" if a["is_anomaly"] else "ðŸŸ¢ NO",
                         "Risk Tier": a["risk_category"],
                         "Health Score": f"{a['health_score']:.1f}/100" if a["health_score"] is not None else "N/A",
                         "CPU (%)": f"{a.get('cpu_percent', 0.0):.1f}%",
@@ -1138,11 +1199,11 @@ def main() -> None:
             # Investigation Inspector for a Selected Anomaly
             if filtered:
                 st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
-                st.markdown("#### 🔬 Detailed Event Diagnostics &amp; Feature Inspector")
+                st.markdown("#### ðŸ”¬ Detailed Event Diagnostics &amp; Feature Inspector")
                 st.caption("Select any recorded evaluation from the audit log to inspect its underlying telemetry evidence and diagnostic recommendations.")
 
                 event_options = [
-                    f"#{filtered[i]['feature_id']} — {format_timestamp(filtered[i]['timestamp'])} — Score: {filtered[i]['anomaly_score']:.4f} ({filtered[i]['risk_category']})"
+                    f"#{filtered[i]['feature_id']} â€” {format_timestamp(filtered[i]['timestamp'])} â€” Score: {filtered[i]['anomaly_score']:.4f} ({filtered[i]['risk_category']})"
                     for i in range(len(filtered))
                 ]
                 sel_idx = st.selectbox("Select Anomaly Evaluation Event to Inspect", options=range(len(filtered)), format_func=lambda i: event_options[i])
@@ -1163,8 +1224,8 @@ def main() -> None:
                 render_diagnostic_report(diag_for_event, theme="dark")
         else:
             st.markdown(
-                f"""<div class="aiops-empty-state">
-                    <div style="font-size:28px;">🔍</div>
+                f"""<div class="sentinel-empty-state aiops-empty-state">
+                    <div style="font-size:28px;">ðŸ”</div>
                     <div class="title">No Anomaly History Available</div>
                     <div class="desc">No historical feature vectors are available in SQLite to evaluate. Capture a snapshot or run the background collector worker to begin logging audit evaluations.</div>
                 </div>""",
@@ -1174,7 +1235,7 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page 6: Database & Operational Status
     # -------------------------------------------------------------------------
-    elif page in ("🗄️ Database & Operational Status", "🗄️ Database Inspection"):
+    elif page in ("ðŸ—„ï¸ System Operations", "ðŸ—„ï¸ Database & Operational Status", "ðŸ—„ï¸ Database Inspection"):
         st.markdown(
             '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">'
             '<div>'
@@ -1195,16 +1256,16 @@ def main() -> None:
         overall = op_status["overall_status"]
         if overall == "HEALTHY":
             status_color = "#10B981"
-            status_icon = "🟢"
+            status_icon = "ðŸŸ¢"
         elif overall == "DEGRADED":
             status_color = "#F59E0B"
-            status_icon = "🟡"
+            status_icon = "ðŸŸ¡"
         else:
             status_color = "#EF4444"
-            status_icon = "🔴"
+            status_icon = "ðŸ”´"
 
         banner_html = (
-            f'<div class="aiops-metric-card" style="border-left:4px solid {status_color}; margin-bottom:18px;">'
+            f'<div class="sentinel-card aiops-metric-card" style="border-left:4px solid {status_color}; margin-bottom:18px;">'
             f'<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">'
             f'<div>'
             f'<div style="font-size:11px; font-weight:700; color:{status_color}; text-transform:uppercase; letter-spacing:0.8px;">System Operational Status &bull; {overall}</div>'
@@ -1220,14 +1281,14 @@ def main() -> None:
         st.markdown(banner_html, unsafe_allow_html=True)
 
         # Subsystems Status Cards
-        st.markdown("#### 🏥 Subsystem Operational Health Checks")
+        st.markdown("#### ðŸ¥ Subsystem Operational Health Checks")
         sc1, sc2, sc3, sc4 = st.columns(4)
 
         with sc1:
             db_sub = op_status["subsystems"]["database"]
-            db_icon = "🟢" if db_sub["status"] == "OPERATIONAL" else "🔴"
+            db_icon = "ðŸŸ¢" if db_sub["status"] == "OPERATIONAL" else "ðŸ”´"
             st.markdown(
-                f'<div class="aiops-metric-card">'
+                f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">SQLite Persistence</div>'
                 f'<div style="font-size:18px; font-weight:700; color:#F8FAFC; margin-top:2px;">{db_icon} {db_sub["status"]}</div>'
                 f'<div style="font-size:11px; color:#10B981; margin-top:2px;">Integrity: {db_sub["integrity"]}</div>'
@@ -1238,9 +1299,9 @@ def main() -> None:
 
         with sc2:
             ml_sub = op_status["subsystems"]["ml_engine"]
-            ml_icon = "🟢" if ml_sub["status"] == "OPERATIONAL" else "🟡"
+            ml_icon = "ðŸŸ¢" if ml_sub["status"] == "OPERATIONAL" else "ðŸŸ¡"
             st.markdown(
-                f'<div class="aiops-metric-card">'
+                f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">ML Model Engine</div>'
                 f'<div style="font-size:18px; font-weight:700; color:#F8FAFC; margin-top:2px;">{ml_icon} {ml_sub["status"]}</div>'
                 f'<div style="font-size:11px; color:#38BDF8; margin-top:2px;">{ml_sub["model_name"]}</div>'
@@ -1251,9 +1312,9 @@ def main() -> None:
 
         with sc3:
             col_sub = op_status["subsystems"]["collector"]
-            col_icon = "🟢" if col_sub["status"] == "OPERATIONAL" else "🔴"
+            col_icon = "ðŸŸ¢" if col_sub["status"] == "OPERATIONAL" else "ðŸ”´"
             st.markdown(
-                f'<div class="aiops-metric-card">'
+                f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Hardware Collectors</div>'
                 f'<div style="font-size:18px; font-weight:700; color:#F8FAFC; margin-top:2px;">{col_icon} {col_sub["status"]}</div>'
                 f'<div style="font-size:11px; color:#10B981; margin-top:2px;">{len(col_sub["domains"])} Monitored Domains</div>'
@@ -1264,11 +1325,11 @@ def main() -> None:
 
         with sc4:
             fresh_sub = op_status["subsystems"]["telemetry_freshness"]
-            f_icon = "🟢" if fresh_sub["status"] == "FRESH" else ("🟡" if fresh_sub["status"] == "WARM" else "⚪")
+            f_icon = "ðŸŸ¢" if fresh_sub["status"] == "FRESH" else ("ðŸŸ¡" if fresh_sub["status"] == "WARM" else "âšª")
             delta_val = f"{fresh_sub['seconds_since_last_sample']}s ago" if fresh_sub['seconds_since_last_sample'] is not None else "No telemetry"
             worker_stat = op_status['subsystems']['background_worker']['status']
             st.markdown(
-                f'<div class="aiops-metric-card">'
+                f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Ingestion Freshness</div>'
                 f'<div style="font-size:18px; font-weight:700; color:#F8FAFC; margin-top:2px;">{f_icon} {fresh_sub["status"]}</div>'
                 f'<div style="font-size:11px; color:#38BDF8; margin-top:2px;">{delta_val}</div>'
@@ -1278,14 +1339,14 @@ def main() -> None:
             )
 
         st.markdown("<div style='margin-top:24px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### 🗄️ SQLite Storage Metrics &amp; Table Capacities")
+        st.markdown("#### ðŸ—„ï¸ SQLite Storage Metrics &amp; Table Capacities")
 
         db_summary = service.get_database_summary()
 
         col_d1, col_d2, col_d3, col_d4 = st.columns(4)
         with col_d1:
             st.markdown(
-                f'<div class="aiops-metric-card">'
+                f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Database File</div>'
                 f'<div style="font-size:20px; font-weight:700; color:#F8FAFC; margin-top:2px;">{"Active" if db_summary["database_exists"] else "Missing"}</div>'
                 f'<div style="font-size:11px; color:#38BDF8; margin-top:2px;">Size: {format_bytes(db_summary["file_size_bytes"])}</div>'
@@ -1294,7 +1355,7 @@ def main() -> None:
             )
         with col_d2:
             st.markdown(
-                f'<div class="aiops-metric-card">'
+                f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Telemetry Rows</div>'
                 f'<div style="font-size:20px; font-weight:700; color:#F8FAFC; margin-top:2px;">{db_summary["counts"]["system_metrics"]:,}</div>'
                 f'<div style="font-size:11px; color:#10B981; margin-top:2px;">table: system_metrics</div>'
@@ -1303,7 +1364,7 @@ def main() -> None:
             )
         with col_d3:
             st.markdown(
-                f'<div class="aiops-metric-card">'
+                f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Feature Vectors</div>'
                 f'<div style="font-size:20px; font-weight:700; color:#F8FAFC; margin-top:2px;">{db_summary["counts"]["feature_vectors"]:,}</div>'
                 f'<div style="font-size:11px; color:#10B981; margin-top:2px;">table: feature_vectors</div>'
@@ -1312,7 +1373,7 @@ def main() -> None:
             )
         with col_d4:
             st.markdown(
-                f'<div class="aiops-metric-card">'
+                f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Validation Logs</div>'
                 f'<div style="font-size:20px; font-weight:700; color:#F8FAFC; margin-top:2px;">{db_summary["counts"]["validation_logs"]:,}</div>'
                 f'<div style="font-size:11px; color:#10B981; margin-top:2px;">table: validation_logs</div>'
@@ -1349,7 +1410,7 @@ def main() -> None:
         st.markdown("<div style='margin-top:24px;'></div>", unsafe_allow_html=True)
         col_exp_title, col_exp_btn = st.columns([2, 1])
         with col_exp_title:
-            st.markdown("#### 🔍 Table Data &amp; Schema Explorer")
+            st.markdown("#### ðŸ” Table Data &amp; Schema Explorer")
         table_choice = st.selectbox("Select Table to Inspect", ["system_metrics", "feature_vectors", "validation_logs"])
         table_limit = st.slider("Rows to Display", min_value=5, max_value=100, value=15, step=5)
 
@@ -1361,7 +1422,7 @@ def main() -> None:
                 csv_tbl = service.export_metrics_csv(limit=table_limit)
                 file_name = f"system_metrics_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
             st.download_button(
-                label=f"⬇️ Export {table_choice} CSV",
+                label=f"â¬‡ï¸ Export {table_choice} CSV",
                 data=csv_tbl,
                 file_name=file_name,
                 mime="text/csv",
@@ -1380,8 +1441,8 @@ def main() -> None:
                         "Disk (%)": f"{r.disk_percent:.1f}%" if r.disk_percent is not None else "N/A",
                         "TX (KB/s)": f"{((r.network_bytes_sent_per_sec or 0.0) / 1024.0):,.1f}",
                         "RX (KB/s)": f"{((r.network_bytes_recv_per_sec or 0.0) / 1024.0):,.1f}",
-                        "Processes": r.process_count or "—",
-                        "Top Process": f"{r.top_process_name or 'N/A'} (PID: {r.top_process_pid or '—'})",
+                        "Processes": r.process_count or "â€”",
+                        "Top Process": f"{r.top_process_name or 'N/A'} (PID: {r.top_process_pid or 'â€”'})",
                     }
                     for r in reversed(records)
                 ])
@@ -1394,7 +1455,7 @@ def main() -> None:
                 df_feat = pd.DataFrame([
                     {
                         "Feature ID": f.id,
-                        "Metric ID": f.metric_id or "—",
+                        "Metric ID": f.metric_id or "â€”",
                         "Timestamp (UTC)": format_timestamp(f.timestamp),
                         "CPU Utilization": f"{f.features.get('cpu_utilization_percent', 0.0):.1f}%",
                         "RAM Utilization": f"{f.features.get('memory_utilization_percent', 0.0):.1f}%",

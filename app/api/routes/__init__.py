@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
+from app.api.routes.ai import router as ai_router
 from app.api.routes.anomalies import router as anomalies_router
 from app.api.routes.database import router as database_router
 from app.api.routes.export import router as export_router
@@ -14,6 +15,7 @@ from app.api.routes.simulation import router as simulation_router
 from app.api.routes.telemetry import router as telemetry_router
 
 api_router = APIRouter()
+api_router.include_router(ai_router)
 api_router.include_router(telemetry_router)
 api_router.include_router(monitoring_router)
 api_router.include_router(ml_router)

@@ -204,6 +204,33 @@ class TestConfiguration:
         with pytest.raises(ValueError, match="Must be an integer"):
             load_config()
 
+    def test_valid_ai_providers_pass_validation(self) -> None:
+        """Verify all supported AI providers (gemma, ollama, heuristic, mock) pass validation."""
+        for provider in ("gemma", "ollama", "heuristic", "mock", "GEMMA", "OLLAMA"):
+            cfg = load_config(ai_provider=provider)
+            assert cfg.ai_provider == provider.lower()
+
+    def test_invalid_ai_provider_raises_error(self) -> None:
+        """Verify unsupported AI provider raises ValueError with clear allowlist."""
+        with pytest.raises(ValueError, match="Invalid ai_provider 'unsupported_engine'. Must be one of: gemma, heuristic, mock, ollama"):
+            load_config(ai_provider="unsupported_engine")
+
+    def test_ai_provider_environment_variable_override(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Verify AI_PROVIDER environment variable is correctly parsed."""
+        monkeypatch.setenv("AI_PROVIDER", "gemma")
+        cfg = load_config()
+        assert cfg.ai_provider == "gemma"
+
+        monkeypatch.setenv("AI_PROVIDER", "ollama")
+        cfg2 = load_config()
+        assert cfg2.ai_provider == "ollama"
+
+        monkeypatch.setenv("AI_PROVIDER", "heuristic")
+        cfg3 = load_config()
+        assert cfg3.ai_provider == "heuristic"
+
     def test_invalid_missing_value_strategy_raises_error(self) -> None:
         """Verify invalid missing_value_strategy raises ValueError."""
         with pytest.raises(ValueError, match="Invalid missing_value_strategy"):

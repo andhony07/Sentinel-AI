@@ -11,4 +11,3 @@ toolbarMode = "minimal"
 
 [server]
 headless = true
-x

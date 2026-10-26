@@ -31,8 +31,8 @@ def render_health_and_risk(
 
     if prediction is None:
         st.markdown(
-            f"""<div class="aiops-empty-state">
-                <div style="font-size:28px;">🛡️</div>
+            f"""<div class="sentinel-empty-state aiops-empty-state">
+                <div style="font-size:28px;">ðŸ›¡ï¸</div>
                 <div class="title">System Health &amp; Risk Evaluation Unavailable</div>
                 <div class="desc">No active telemetry feature vectors exist in the database to evaluate health scores. Click <b>"Capture Live Snapshot"</b> in the sidebar or run <code>python run.py</code> to ingest live telemetry.</div>
             </div>""",
@@ -43,7 +43,7 @@ def render_health_and_risk(
     # Check for heuristic baseline fallback
     if not is_model_trained or "Heuristic" in prediction.model_name or "fallback" in " ".join(prediction.warnings).lower():
         st.warning(
-            "⚠️ **Heuristic Baseline Mode**: A trained Isolation Forest model is not yet loaded. "
+            "âš ï¸ **Heuristic Baseline Mode**: A trained Isolation Forest model is not yet loaded. "
             "Health score and risk level are estimated using deterministic hardware saturation rules. "
             "Train an ML model with `python run.py --train` to activate full unsupervised anomaly detection."
         )
@@ -93,12 +93,12 @@ def render_health_and_risk(
 
     # Warnings / Deductions breakdown if present
     if prediction.warnings:
-        with st.expander("🔍 Health Score & Anomaly Deductions Detail", expanded=False):
+        with st.expander("ðŸ” Health Score & Anomaly Deductions Detail", expanded=False):
             for warn in prediction.warnings:
-                st.markdown(f"- ⚠️ {warn}")
+                st.markdown(f"- âš ï¸ {warn}")
 
     # Mandatory Academic Notice
     st.caption(
-        "📌 **Academic & Operational Notice**: Anomaly detection identifies behavioral and statistical deviations "
+        "ðŸ“Œ **Academic & Operational Notice**: Anomaly detection identifies behavioral and statistical deviations "
         "relative to baseline telemetry. It does **not** establish that physical hardware or the server will fail."
     )

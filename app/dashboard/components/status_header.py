@@ -50,17 +50,19 @@ def render_status_header(
         )
         title_html = (
             f"<div style='margin-bottom:2px;'>"
-            f"<div style='font-size:11px; font-weight:700; color:{tokens.accent}; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:2px;'>"
-            f"AI Based Server Health Monitoring &bull; Operations Center"
+            f"<div style='font-size:11px; font-weight:700; color:{tokens.accent}; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:2px; display:flex; align-items:center; gap:6px;'>"
+            f"<span>ðŸ›¡ï¸ SENTINELAI</span>"
+            f"<span style='color:{tokens.text_muted};'>&bull;</span>"
+            f"<span>OPERATIONS CONSOLE</span>"
             f"</div>"
-            f"<h2 style='margin:0; color:{tokens.text_primary}; font-weight:700; letter-spacing:-0.4px; font-size:20px; display:inline-block;'>"
-            f"AI Server Health &amp; Failure Risk Monitor"
-            f"</h2>"
+            f"<h2 style='margin:0; color:{tokens.text_primary}; font-weight:700; letter-spacing:-0.4px; font-size:22px; display:inline-flex; align-items:center; flex-wrap:wrap; gap:8px;'>"
+            f"<span>SentinelAI</span>"
             f"{sec_badge}"
-            f"</div>"
-            f"<p style='color:{tokens.text_secondary}; font-size:12px; margin:0; letter-spacing:0.1px;'>"
-            f"Real-Time OS Telemetry &bull; Isolation Forest Anomaly Detection"
+            f"</h2>"
+            f"<p style='color:{tokens.text_secondary}; font-size:12px; margin:3px 0 0 0; letter-spacing:0.1px;'>"
+            f"Intelligent Server Health &amp; Failure Risk Monitoring &bull; Isolation Forest ML"
             f"</p>"
+            f"</div>"
         )
         st.markdown(title_html, unsafe_allow_html=True)
 
@@ -68,32 +70,34 @@ def render_status_header(
         # System status pill grounded in real state
         status_val = overall_status or ("OPERATIONAL" if is_model_trained else "STANDBY")
         if status_val in ("HEALTHY", "OPERATIONAL"):
-            sys_pill = f"<span style='background-color:{tokens.bg_normal}; color:{tokens.color_normal}; border:1px solid {tokens.color_normal}40; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700;'>🟢 {status_val}</span>"
+            sys_pill = f"<span style='background-color:{tokens.bg_normal}; color:{tokens.color_normal}; border:1px solid {tokens.color_normal}40; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700;'>ðŸŸ¢ {status_val}</span>"
         elif status_val == "DEGRADED":
-            sys_pill = f"<span style='background-color:{tokens.bg_moderate}; color:{tokens.color_moderate}; border:1px solid {tokens.color_moderate}40; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700;'>🟡 DEGRADED</span>"
+            sys_pill = f"<span style='background-color:{tokens.bg_moderate}; color:{tokens.color_moderate}; border:1px solid {tokens.color_moderate}40; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700;'>ðŸŸ¡ DEGRADED</span>"
         else:
-            sys_pill = f"<span style='background-color:{tokens.bg_card_secondary}; color:{tokens.text_muted}; border:1px solid {tokens.border_color}; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700;'>⚪ {status_val}</span>"
+            sys_pill = f"<span style='background-color:{tokens.bg_card_secondary}; color:{tokens.text_muted}; border:1px solid {tokens.border_color}; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700;'>âšª {status_val}</span>"
 
         # Worker status pill
         monitor_pill = (
-            f"<span style='background-color:{tokens.bg_normal}; color:{tokens.color_normal}; border:1px solid {tokens.color_normal}30; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>🟢 Worker: Active</span>"
+            f"<span style='background-color:{tokens.bg_normal}; color:{tokens.color_normal}; border:1px solid {tokens.color_normal}30; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>ðŸŸ¢ Worker: Active</span>"
             if is_monitoring
-            else f"<span style='background-color:{tokens.bg_card_secondary}; color:{tokens.text_muted}; border:1px solid {tokens.border_color}; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>⚪ Worker: Idle</span>"
+            else f"<span style='background-color:{tokens.bg_card_secondary}; color:{tokens.text_muted}; border:1px solid {tokens.border_color}; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>âšª Worker: Idle</span>"
         )
 
         model_pill = (
-            f"<span style='background-color:{tokens.bg_low}; color:{tokens.color_low}; border:1px solid {tokens.color_low}30; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>🤖 ML: {model_name}</span>"
+            f"<span style='background-color:{tokens.bg_low}; color:{tokens.color_low}; border:1px solid {tokens.color_low}30; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>ðŸ¤– ML: {model_name}</span>"
             if is_model_trained
-            else f"<span style='background-color:{tokens.bg_moderate}; color:{tokens.color_moderate}; border:1px solid {tokens.color_moderate}30; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>⚠️ Heuristic Baseline</span>"
+            else f"<span style='background-color:{tokens.bg_moderate}; color:{tokens.color_moderate}; border:1px solid {tokens.color_moderate}30; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>âš ï¸ Heuristic Baseline</span>"
         )
 
-        db_pill = f"<span style='background-color:{tokens.bg_card_secondary}; color:{tokens.text_secondary}; border:1px solid {tokens.border_color}; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>🗄️ SQLite: {db_record_count:,}</span>"
+        db_pill = f"<span style='background-color:{tokens.bg_card_secondary}; color:{tokens.text_secondary}; border:1px solid {tokens.border_color}; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;'>ðŸ—„ï¸ SQLite: {db_record_count:,}</span>"
 
         ts_str = format_timestamp(last_updated) if last_updated else "No Telemetry Ingested"
         status_html = (
-            f"<div style='text-align: right; padding-top: 2px;'>"
-            f"{sys_pill} &nbsp; {monitor_pill} &nbsp; {model_pill} &nbsp; {db_pill}"
-            f"<div style='color: {tokens.text_muted}; font-size: 11px; margin-top: 5px;'>"
+            f"<div style='display:flex; flex-direction:column; align-items:flex-end; gap:4px; padding-top:2px;'>"
+            f"<div style='display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px;'>"
+            f"{sys_pill}{monitor_pill}{model_pill}{db_pill}"
+            f"</div>"
+            f"<div style='color: {tokens.text_muted}; font-size: 11px; margin-top: 2px;'>"
             f"Last Ingestion: <b style='color:{tokens.text_secondary}; font-variant-numeric:tabular-nums;'>{ts_str}</b>"
             f"</div>"
             f"</div>"

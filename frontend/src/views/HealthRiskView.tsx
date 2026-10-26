@@ -12,11 +12,15 @@ import {
   Zap,
 } from 'lucide-react';
 import {
+  getAIStatus,
+  getLatestAIDiagnosis,
   getLatestDiagnostics,
   getLatestPrediction,
   getModelStatus,
+  generateAIDiagnosis,
 } from '../api';
 import {
+  AIDiagnosticCard,
   Button,
   Card,
   EmptyState,
@@ -26,6 +30,8 @@ import {
   StatusBadge,
 } from '../components/common';
 import type {
+  AIIncidentDiagnosis,
+  AIStatusResponse,
   DiagnosticReport,
   ModelStatusResponse,
   PredictionResult,
@@ -38,22 +44,51 @@ export const HealthRiskView: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // AI Diagnostic Assistant state
+  const [aiDiagnosis, setAiDiagnosis] = useState<AIIncidentDiagnosis | null>(null);
+  const [aiStatus, setAiStatus] = useState<AIStatusResponse | null>(null);
+  const [aiLoading, setAiLoading] = useState<boolean>(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
   const fetchData = async () => {
     try {
       setError(null);
-      const [pred, diag, model] = await Promise.all([
+      const [pred, diag, model, aiLatest, aiStat] = await Promise.all([
         getLatestPrediction().catch(() => null),
         getLatestDiagnostics().catch(() => null),
         getModelStatus().catch(() => null),
+        getLatestAIDiagnosis().catch(() => null),
+        getAIStatus().catch(() => null),
       ]);
       setPrediction(pred);
       setDiagnostics(diag);
       setModelStatus(model);
+      if (aiLatest) {
+        setAiDiagnosis(aiLatest);
+      }
+      if (aiStat) {
+        setAiStatus(aiStat);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to fetch health and risk analytics.';
       setError(msg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateAIDiagnosis = async (forceFallback = false) => {
+    if (aiLoading) return;
+    try {
+      setAiLoading(true);
+      setAiError(null);
+      const result = await generateAIDiagnosis({ force_fallback: forceFallback });
+      setAiDiagnosis(result);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to generate AI diagnosis.';
+      setAiError(msg);
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -514,6 +549,16 @@ export const HealthRiskView: React.FC = () => {
           />
         )}
       </Card>
+
+      {/* SentinelAI AI Diagnostic Assistant */}
+      <AIDiagnosticCard
+        diagnosis={aiDiagnosis}
+        status={aiStatus}
+        loading={aiLoading}
+        error={aiError}
+        onGenerate={handleGenerateAIDiagnosis}
+        onRetry={() => handleGenerateAIDiagnosis(false)}
+      />
     </div>
   );
 };

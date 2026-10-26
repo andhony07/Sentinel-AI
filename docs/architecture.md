@@ -58,13 +58,13 @@ flowchart TD
 
 The codebase enforces strict separation of concerns, isolating hardware I/O, mathematical transformations, algorithmic inference, persistent storage, and UI presentation into dedicated packages under `app/`.
 
-### 2.1 Core Subsystem (`app/core/`) — *Implemented in Phase 1*
+### 2.1 Core Subsystem (`app/core/`) â€” *Implemented in Phase 1*
 * **Responsibility**: Provides configuration parsing, environment management, and structured logging.
 * **Key Components**:
   - `config.py`: Centralized immutable `Settings` dataclass providing typed paths via `pathlib.Path`, environment variable overrides with `.env` integration, validation rules, and directory bootstrap routines.
   - `logging_config.py`: Dual-destination logging framework (simultaneous console `stdout` and persistent file output in `logs/`) with timestamping, configurable log levels, and automatic prevention of duplicate handlers across repeated imports.
 
-### 2.2 Telemetry Collectors (`app/collectors/`) & Data Models (`app/models/`) — *Implemented in Phase 2*
+### 2.2 Telemetry Collectors (`app/collectors/`) & Data Models (`app/models/`) â€” *Implemented in Phase 2*
 * **Responsibility**: Non-intrusive, low-overhead sampling of host metrics and structured, typed data encapsulation.
 * **Implemented Components**:
   - `models/metrics.py`: Strongly typed, immutable dataclasses (`CPUMetrics`, `MemoryMetrics`, `DiskPartitionMetrics`, `DiskMetrics`, `NetworkMetrics`, `ProcessMetrics`, `SystemMetrics`) with helper properties, UTC timestamps, and `.to_dict()` serialization.
@@ -77,7 +77,7 @@ The codebase enforces strict separation of concerns, isolating hardware I/O, mat
   - `collectors/system_collector.py`: Central coordinator orchestrating all collectors with isolated failure boundaries, returning unified `SystemMetrics` and managing periodic loops with clean shutdown.
 * **Separation Boundary**: Collectors only read from `psutil` or OS APIs and return raw, typed dataclasses. They contain zero ML or visualization logic.
 
-### 2.3 Preprocessing & Feature Engineering (`app/preprocessing/`) — *Implemented in Phase 3*
+### 2.3 Preprocessing & Feature Engineering (`app/preprocessing/`) â€” *Implemented in Phase 3*
 * **Responsibility**: Validate, sanitize, and transform raw multi-domain metrics into clean, structured numerical feature vectors suitable for future machine learning and historical persistence.
 * **Implemented Components**:
   - `validator.py`: `MetricsValidator` and `ValidationResult` inspecting raw `SystemMetrics` snapshots for missing, out-of-range, and non-finite values (NaN/inf) without halting the collection loop.
@@ -87,7 +87,7 @@ The codebase enforces strict separation of concerns, isolating hardware I/O, mat
   - `pipeline.py`: `PreprocessingPipeline` orchestrating validation, cleaning, rolling buffer tracking, and feature extraction into a cohesive `ProcessedTelemetry` container.
 * **Separation Boundary**: Preprocessing produces clean numerical arrays or dictionary-backed `FeatureVector` instances ready for either the database repository or future ML models. It does not train ML models or write directly to databases.
 
-### 2.4 Database Persistence (`app/database/`) — *Implemented in Phase 4*
+### 2.4 Database Persistence (`app/database/`) â€” *Implemented in Phase 4*
 * **Responsibility**: Lightweight, robust, self-contained time-series telemetry persistence and historical data access using SQLite.
 * **Implemented Components**:
   - `connection.py`: Reliable SQLite connection lifecycle management, WAL mode activation (`PRAGMA journal_mode = WAL;`), foreign key enforcement (`PRAGMA foreign_keys = ON;`), busy lock timeouts (`PRAGMA busy_timeout`), and atomic transactional context managers (`transaction_scope`, `db_session`) with rollback protection.
@@ -98,7 +98,7 @@ The codebase enforces strict separation of concerns, isolating hardware I/O, mat
   - `service.py`: High-level persistence coordinator (`PersistenceService`) that coordinates atomic multi-table inserts (linking raw metrics, 39-feature vectors, and validation logs via foreign keys within a single transactional boundary), handles errors gracefully without crashing the collection loop, and executes retention purges.
 * **Separation Boundary**: Fully abstracts all SQL DDL/DML behind typed repository and service interfaces. Collectors, feature pipelines, and ML components never construct raw SQL queries.
 
-### 2.5 Machine Learning & Failure Risk Analysis (`app/ml/`) — *Implemented in Phase 5*
+### 2.5 Machine Learning & Failure Risk Analysis (`app/ml/`) â€” *Implemented in Phase 5*
 * **Responsibility**: Detect unusual host behavior using unsupervised machine learning, compute deterministic operational health scores, assign risk tiers, and provide an extensible interface for future supervised failure classification.
 * **Implemented Components**:
   - `models.py`: Strongly typed dataclasses and enums (`RiskCategory`, `AnomalyResult`, `HealthScoreResult`, `PredictionResult`, `ModelMetadata`).
@@ -113,18 +113,39 @@ The codebase enforces strict separation of concerns, isolating hardware I/O, mat
   - `training.py`: `ModelTrainer` end-to-end training orchestrator and CLI runner.
 * **Separation Boundary**: ML components accept standardized `FeatureVector` or NumPy arrays and return structured `PredictionResult` objects. They do not query OS telemetry directly or access raw tables bypassing `PersistenceService`.
 
-### 2.6 Dashboard & Presentation (`app/dashboard/`) — *Implemented in Phase 6*
+### 2.6 Dashboard & Presentation (`app/dashboard/`) â€” *Implemented in Phase 6*
 * **Responsibility**: Interactive web visualization, system health telemetry monitoring, anomaly auditing, and database inspection using Streamlit and Plotly.
 * **Architecture & Components**:
   - `dashboard_main.py`: Streamlit entry point orchestrating 6 comprehensive views: System Overview, Health & Risk Analysis, Real-Time Monitoring, Historical Telemetry, Anomaly Audit Log, and Database Inspection.
   - `services/dashboard_service.py`: High-level coordination layer decoupling the web UI from direct database and ML layers; provides thread-safe background monitoring controls with `threading.Event`, live telemetry snapshots, historical query bounds, and safe fallback handling.
-  - `charts/builders.py`: Modular Plotly chart builders generating interactive gauges (Health Score 0–100, Anomaly Probability 0.0–1.0), resource breakdown bars with threshold reference lines, dual-axis multi-metric time-series graphs, and risk-categorized anomaly scatter charts.
+  - `charts/builders.py`: Modular Plotly chart builders generating interactive gauges (Health Score 0â€“100, Anomaly Probability 0.0â€“1.0), resource breakdown bars with threshold reference lines, dual-axis multi-metric time-series graphs, and risk-categorized anomaly scatter charts.
   - `components/`: Reusable Streamlit UI widgets including `status_header.py` (system state banner), `metrics_cards.py` (CPU/RAM/Disk/Network/Process metrics with warning thresholds), and `health_card.py` (gauge visualizers, risk tier matrix, heuristic fallback notices, and academic disclaimers).
   - `utils/formatting.py`: Human-readable formatters for byte counts, network throughput, percentages, ISO/local timestamps, and risk severity badges.
 * **Separation Boundary**: Operates as a decoupled presentation layer communicating exclusively via `DashboardService`. Ensures thread safety with dedicated worker locks and never starts competing collectors upon Streamlit script reruns.
 
 ### 2.7 Cross-Cutting Utilities (`app/utils/`)
 * **Responsibility**: Platform detection, time-zone formatting, and general helper routines shared across modules without circular dependencies.
+
+### 2.8 REST API Layer (`app/api/`) â€” *Implemented in SentinelAI Expansion*
+* **Responsibility**: Expose asynchronous, OpenAPI-compliant HTTP endpoints for system telemetry, ML inference, synthetic anomaly simulations, and AI diagnostic queries.
+* **Key Components**:
+  - `main.py`: FastAPI application entry point, CORS middleware configuration, global exception handlers, and API router aggregation.
+  - `dependencies.py`: Dependency injection providers for `Settings`, `PersistenceService`, `PredictionService`, and `AIDiagnosticService`.
+  - `routes/telemetry.py`: Endpoints for live telemetry snapshot capture and historical telemetry queries.
+  - `routes/ml.py`: Endpoints for anomaly detection inference, health scoring, and model status.
+  - `routes/simulation.py`: Deterministic synthetic anomaly simulation endpoints (CPU spike, memory leak, disk thrash) with isolated safety guards.
+  - `routes/ai.py`: AI status endpoint (`GET /api/ai/status`) reporting Ollama availability, model state, and fallback status; diagnostic evaluation endpoint (`POST /api/ai/diagnose`).
+* **Separation Boundary**: Consumes application domain services via dependency injection; returns structured Pydantic schemas.
+
+### 2.9 AI Diagnostic Engine & Safety Layer (`app/ai/`) â€” *Implemented in SentinelAI Expansion*
+* **Responsibility**: Grounded incident explanation, root-cause diagnosis, and safe remediation recommendations powered by local LLMs (`qwen2.5:3b` via Ollama) with an authoritative deterministic fallback engine.
+* **Key Components**:
+  - `client.py`: Async and sync Ollama client (`OllamaClient`) with timeout handling, connection probing, and structured prompt dispatching.
+  - `diagnostic_service.py`: `AIDiagnosticService` orchestrating prompt synthesis grounded in authoritative ML health scores and telemetry, JSON schema enforcement, and deterministic fallback generation.
+  - `fallback_engine.py`: Rules-based deterministic diagnostic fallback generating structured diagnostic summaries when Ollama is offline or times out.
+  - `safety.py`: Multi-tier command safety filter detecting hazardous shell patterns, OS mismatching, and enforcing human-in-the-loop review. Remediation commands are strictly advisory and never executed automatically.
+  - `models.py`: Strongly typed Pydantic models for diagnosis requests, structured responses, safety violations, and remediation action plans.
+* **Separation Boundary**: AI diagnostics are strictly advisory. ML anomaly scores, health scores, and risk classifications remain authoritative and uncorrupted by LLM output.
 
 ---
 
@@ -134,28 +155,28 @@ The end-to-end operational cycle follows a linear, deterministic pipeline:
 
 ```text
 [Hardware Sensors / OS Kernel]
-               │ (Sampling Interval: 5.0s default)
-               ▼
+               â”‚ (Sampling Interval: 5.0s default)
+               â–¼
       [psutil Collectors]
       (CPU, Memory, Disk, Network, Process)
-               │ Unified SystemMetrics Snapshot (UTC)
-               ▼
+               â”‚ Unified SystemMetrics Snapshot (UTC)
+               â–¼
     [Preprocessing & Feature Pipeline]
-    ├── 1. MetricsValidator (Range & NaN/Inf Checks)
-    ├── 2. MetricsCleaner (Imputation & Boundary Clamping)
-    ├── 3. RollingWindowBuffer (Bounded Deque, Moving Stats)
-    └── 4. FeatureEngineer (39 Numerical Features)
-               │ Standardized FeatureVector & ProcessedTelemetry
-       ┌───────┴───────────────────┐
-       ▼                           ▼
+    â”œâ”€â”€ 1. MetricsValidator (Range & NaN/Inf Checks)
+    â”œâ”€â”€ 2. MetricsCleaner (Imputation & Boundary Clamping)
+    â”œâ”€â”€ 3. RollingWindowBuffer (Bounded Deque, Moving Stats)
+    â””â”€â”€ 4. FeatureEngineer (39 Numerical Features)
+               â”‚ Standardized FeatureVector & ProcessedTelemetry
+       â”Œâ”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+       â–¼                           â–¼
 [SQLite Storage]           [ML Prediction Service]
-├── system_metrics          ├── IsolationForestDetector (Calibrated Score 0.0 - 1.0)
-├── feature_vectors         ├── HealthScoreCalculator (Composite Score 0 - 100)
-└── validation_logs         └── RiskAnalyzer (Normal / Low / Moderate / High / Critical)
+â”œâ”€â”€ system_metrics          â”œâ”€â”€ IsolationForestDetector (Calibrated Score 0.0 - 1.0)
+â”œâ”€â”€ feature_vectors         â”œâ”€â”€ HealthScoreCalculator (Composite Score 0 - 100)
+â””â”€â”€ validation_logs         â””â”€â”€ RiskAnalyzer (Normal / Low / Moderate / High / Critical)
 (Phase 4 - COMPLETED)       (Phase 5 - COMPLETED)
-       │                           │
-       └──────────────┬────────────┘
-                      ▼
+       â”‚                           â”‚
+       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                      â–¼
             [Streamlit Dashboard]
             (Plotly Gauges & Charts)
             (Phase 6 - COMPLETED)
@@ -185,9 +206,13 @@ The end-to-end operational cycle follows a linear, deterministic pipeline:
 | **Phase 1** | **Project Foundation & Architecture** | **COMPLETED** | Modular directory layout, configuration system, structured logging, entry points, unit tests, architecture specification. |
 | **Phase 2** | **Metric Collection Engine** | **COMPLETED** | `psutil` collectors for CPU, Memory, Disk, Network, and Process health; typed metric data models; failure isolation; periodic sampling loop; unit & integration tests. |
 | **Phase 3** | **Data Preprocessing & Feature Engineering** | **COMPLETED** | Telemetry validator, data cleaner with imputation strategies, bounded rolling window buffer, 39 engineered features, end-to-end preprocessing pipeline, unit & integration tests. |
-| **Phase 4** | **SQLite Data Persistence** | **COMPLETED** | SQLite connection manager (WAL mode, FKs), versioned schema migrations, normalized tables for raw metrics, 39-feature vectors, and validation logs, atomic transactions, retention cleanup, full test suite (94 passing tests). |
-| **Phase 5** | **Machine Learning & Failure Risk Engine** | **COMPLETED** | Historical SQLite data loader, Isolation Forest anomaly detector, logistic score calibration, deterministic 0–100 health scoring, multi-tier risk analyzer, atomic model persistence, supervised failure classification extension point, 48 ML unit/integration tests (143 total passing tests). |
-| **Phase 6** | **Interactive Web Dashboard** | **COMPLETED** | Streamlit web application, modular components and chart builders, thread-safe monitoring lifecycle, live Plotly gauges, historical telemetry and anomaly audit views, database inspector, 18 new unit & integration tests (161 total passing tests). |
-| **Phase 7** | Linux Extensibility & Deployment | *Planned* | Cross-platform validation, daemon/service packaging, integration testing. |
+| **Phase 4** | **SQLite Data Persistence** | **COMPLETED** | SQLite connection manager (WAL mode, FKs), versioned schema migrations, normalized tables for raw metrics, 39-feature vectors, and validation logs, atomic transactions, retention cleanup. |
+| **Phase 5** | **Machine Learning & Failure Risk Engine** | **COMPLETED** | Historical SQLite data loader, Isolation Forest anomaly detector, logistic score calibration, deterministic 0â€“100 health scoring, multi-tier risk analyzer, atomic model persistence, supervised failure classification extension point. |
+| **Phase 6** | **Interactive Web Dashboard** | **COMPLETED** | Streamlit web application, modular components and chart builders, thread-safe monitoring lifecycle, live Plotly gauges, historical telemetry and anomaly audit views. |
+| **SentinelAI Phase 1** | **FastAPI REST API & Architecture Audit** | **COMPLETED** | Production-ready FastAPI endpoints for telemetry, ML inference, and synthetic anomaly simulation; CORS middleware, OpenAPI docs. |
+| **SentinelAI Phase 2** | **AI Diagnostic Engine & Local Ollama LLM** | **COMPLETED** | Local LLM inference (`qwen2.5:3b`), incident explanations, root cause analysis, deterministic rules-based fallback engine. |
+| **SentinelAI Phase 3A** | **AI Safety & Dangerous Command Filtering** | **COMPLETED** | OS-aware validation, dangerous shell pattern detection, human-in-the-loop review enforcement; remediation commands strictly advisory. |
+| **SentinelAI Phase 3B** | **End-to-End Testing & Playwright Automation** | **COMPLETED** | Comprehensive regression tests (332 passed), Playwright browser E2E test suite (10 passed), synthetic simulation verification. |
+| **SentinelAI Phase 4** | **Deployment Readiness & Hackathon Demo Preparation** | **COMPLETED** | Unified launcher/shutdown scripts, zero-config resilience, status clarity, judge demo guide, and troubleshooting documentation. |
 
 

@@ -167,7 +167,7 @@ export const DatabaseStatusView: React.FC = () => {
                 <StatusBadge status={systemStatus.overall_status} />
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-                {systemStatus.headline} • Evaluation Time: {systemStatus.timestamp}
+                {systemStatus.headline} â€¢ Evaluation Time: {systemStatus.timestamp}
               </div>
             </div>
           </div>
@@ -328,23 +328,23 @@ export const DatabaseStatusView: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid var(--border-subtle)' }}>
               <span style={{ color: 'var(--text-muted)' }}>API Server URL:</span>
               <a
-                href="http://localhost:8000"
+                href="http://127.0.0.1:8081"
                 target="_blank"
                 rel="noreferrer"
                 style={{ color: 'var(--accent-primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}
               >
-                http://localhost:8000 <ExternalLink size={12} />
+                http://127.0.0.1:8081 <ExternalLink size={12} />
               </a>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid var(--border-subtle)' }}>
               <span style={{ color: 'var(--text-muted)' }}>Interactive API Docs:</span>
               <a
-                href="http://localhost:8000/docs"
+                href="http://127.0.0.1:8081/docs"
                 target="_blank"
                 rel="noreferrer"
                 style={{ color: 'var(--accent-primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}
               >
-                http://localhost:8000/docs <ExternalLink size={12} />
+                http://127.0.0.1:8081/docs <ExternalLink size={12} />
               </a>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid var(--border-subtle)' }}>
