@@ -1,4 +1,4 @@
-# SentinelAI â€” React AI Diagnostic Assistant Parity Report
+# SentinelAI — React AI Diagnostic Assistant Parity Report
 
 **Date:** 2026-10-26
 **Project:** SentinelAI Infrastructure Health & Failure Risk Monitoring
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The AI Diagnostic Assistantâ€”originally available only within the Streamlit dashboardâ€”has been fully implemented and integrated into the React frontend (`http://localhost:5173`) with complete feature, visual, and architectural parity. The React frontend now directly communicates with the existing FastAPI AI endpoints (`/api/ai/status`, `/api/ai/latest`, and `/api/ai/diagnose`), rendering evidence-based probable causes, prioritized investigation steps, safety-rated remediation runbooks with non-destructive shell commands, authoritative ML metric scores, and a prominent mandatory human-review safety banner.
+The AI Diagnostic Assistant—originally available only within the Streamlit dashboard—has been fully implemented and integrated into the React frontend (`http://localhost:5173`) with complete feature, visual, and architectural parity. The React frontend now directly communicates with the existing FastAPI AI endpoints (`/api/ai/status`, `/api/ai/latest`, and `/api/ai/diagnose`), rendering evidence-based probable causes, prioritized investigation steps, safety-rated remediation runbooks with non-destructive shell commands, authoritative ML metric scores, and a prominent mandatory human-review safety banner.
 
 All existing unit, integration, and Playwright end-to-end tests continue to pass with zero regressions:
 - **FastAPI / ML / Core Pytest Suite:** 334 passed, 11 skipped, 0 failed (114.31s)
@@ -90,15 +90,15 @@ The new React `AIDiagnosticCard` provides:
    - Robot icon (`Bot`), title **SentinelAI Diagnostic Assistant**.
    - Subtitle: *"Synthesizes live telemetry, top processes, and ML anomaly evaluations into an evidence-grounded incident runbook."*
 2. **Provider & Availability Toolbar:**
-   - Model badge: `ðŸ¤– qwen2.5:3b`
+   - Model badge: `🤖 qwen2.5:3b`
    - AI status badge: `Live Ollama Active` (emerald pill) or `Fallback Active` (amber pill).
    - "Generate AI Diagnosis" primary button with spark icon; triggers inference and disables during request.
 3. **Non-Blocking Loading State:**
    - Displays clear inline progress banner without freezing or dimming unrelated page controls.
-   - Clarifies CPU inference timeline (~45â€“75s) and automatic deterministic fallback behavior.
+   - Clarifies CPU inference timeline (~45–75s) and automatic deterministic fallback behavior.
    - Prevents accidental duplicate submissions while inference is running.
 4. **Execution Mode & Latency Banner:**
-   - Accurately differentiates `AI-POWERED DIAGNOSIS â€¢ QWEN2.5:3B` vs `DETERMINISTIC FALLBACK`.
+   - Accurately differentiates `AI-POWERED DIAGNOSIS • QWEN2.5:3B` vs `DETERMINISTIC FALLBACK`.
    - Displays measured inference latency (e.g. `Latency: 1420.5ms`).
    - Displays incident report identifier (`ID: diag_...`).
 5. **Authoritative ML Scores Row:**
@@ -118,7 +118,7 @@ The new React `AIDiagnosticCard` provides:
 9. **Remediation Runbook:**
    - Ordered action steps with safety classifications (`SAFE`, `CAUTION`, `CRITICAL`).
    - Non-destructive commands rendered in horizontal scrollable monospace code containers.
-   - Explicit inline notice: *"âš ï¸ Manual review required â€” command execution is disabled"*.
+   - Explicit inline notice: *"⚠️ Manual review required — command execution is disabled"*.
    - Operator precautions and prerequisite checks.
 10. **Evidence Boundaries & Uncertainty Assessment:**
     - Explicit statement of telemetry boundaries and unobserved domains.

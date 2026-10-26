@@ -36,7 +36,7 @@ const VIEW_TITLES: Record<ViewType, { title: string; subtitle: string }> = {
   },
   health: {
     title: 'Health & Failure Risk',
-    subtitle: 'Deterministic 0â€“100 health scoring, Isolation Forest inference, and explainable root-cause evidence',
+    subtitle: 'Deterministic 0–100 health scoring, Isolation Forest inference, and explainable root-cause evidence',
   },
   simulation: {
     title: 'Anomaly Simulation Lab',

@@ -32,7 +32,7 @@ def render_diagnostic_report(
     if report is None:
         st.markdown(
             f"""<div class="sentinel-empty-state aiops-empty-state">
-                <div style="font-size:28px;">ðŸ©º</div>
+                <div style="font-size:28px;">🩺</div>
                 <div class="title">Diagnostic Report Unavailable</div>
                 <div class="desc">No diagnostic findings or root-cause evaluations are available for the current telemetry state. Capture a snapshot or execute an anomaly simulation to generate explainable findings.</div>
             </div>""",
@@ -69,19 +69,19 @@ def render_diagnostic_report(
     # Theme-aware severity colors and badges
     if tokens.mode == "dark":
         sev_colors = {
-            EvidenceLevel.CRITICAL: ("#EF4444", "rgba(239, 68, 68, 0.20)", "ðŸ”´"),
-            EvidenceLevel.HIGH: ("#F97316", "rgba(249, 115, 22, 0.20)", "ðŸŸ "),
-            EvidenceLevel.MODERATE: ("#F59E0B", "rgba(245, 158, 11, 0.20)", "ðŸŸ¡"),
-            EvidenceLevel.LOW: ("#38BDF8", "rgba(56, 189, 248, 0.20)", "ðŸ”µ"),
-            EvidenceLevel.INFO: ("#10B981", "rgba(16, 185, 129, 0.20)", "ðŸŸ¢"),
+            EvidenceLevel.CRITICAL: ("#EF4444", "rgba(239, 68, 68, 0.20)", "🔴"),
+            EvidenceLevel.HIGH: ("#F97316", "rgba(249, 115, 22, 0.20)", "🟠"),
+            EvidenceLevel.MODERATE: ("#F59E0B", "rgba(245, 158, 11, 0.20)", "🟡"),
+            EvidenceLevel.LOW: ("#38BDF8", "rgba(56, 189, 248, 0.20)", "🔵"),
+            EvidenceLevel.INFO: ("#10B981", "rgba(16, 185, 129, 0.20)", "🟢"),
         }
     else:
         sev_colors = {
-            EvidenceLevel.CRITICAL: ("#DC2626", "#FEE2E2", "ðŸ”´"),
-            EvidenceLevel.HIGH: ("#EA580C", "#FFEDD5", "ðŸŸ "),
-            EvidenceLevel.MODERATE: ("#D97706", "#FEF3C7", "ðŸŸ¡"),
-            EvidenceLevel.LOW: ("#2563EB", "#EFF6FF", "ðŸ”µ"),
-            EvidenceLevel.INFO: ("#059669", "#D1FAE5", "ðŸŸ¢"),
+            EvidenceLevel.CRITICAL: ("#DC2626", "#FEE2E2", "🔴"),
+            EvidenceLevel.HIGH: ("#EA580C", "#FFEDD5", "🟠"),
+            EvidenceLevel.MODERATE: ("#D97706", "#FEF3C7", "🟡"),
+            EvidenceLevel.LOW: ("#2563EB", "#EFF6FF", "🔵"),
+            EvidenceLevel.INFO: ("#059669", "#D1FAE5", "🟢"),
         }
 
     # 1. Consolidated Empirical Telemetry Evidence Table (Standardized Headers)
@@ -99,7 +99,7 @@ def render_diagnostic_report(
     if all_evidence:
         st.markdown(
             f"<div style='font-size:12px; font-weight:700; color:{tokens.text_secondary}; text-transform:uppercase; letter-spacing:0.6px; margin: 14px 0 6px 0; display:flex; align-items:center; gap:6px;'>"
-            f"<span>ðŸ” Supporting Telemetry Evidence</span>"
+            f"<span>🔍 Supporting Telemetry Evidence</span>"
             f"<span style='font-size:10px; color:{tokens.text_muted}; text-transform:none; font-weight:400;'>(Empirical hardware sensor signals)</span>"
             f"</div>",
             unsafe_allow_html=True,
@@ -110,7 +110,7 @@ def render_diagnostic_report(
     st.markdown("<div style='margin-top:16px;'></div>", unsafe_allow_html=True)
     st.markdown(
         f"<div style='font-size:12px; font-weight:700; color:{tokens.text_secondary}; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; display:flex; align-items:center; gap:6px;'>"
-        f"<span>ðŸ› ï¸ Explainable Diagnostic Recommendations &amp; Prioritized Remediation Plan</span>"
+        f"<span>🛠️ Explainable Diagnostic Recommendations &amp; Prioritized Remediation Plan</span>"
         f"</div>",
         unsafe_allow_html=True,
     )
@@ -118,7 +118,7 @@ def render_diagnostic_report(
     if not report.recommendations:
         st.markdown(
             f"""<div style="background-color:{tokens.bg_card}; border: 1px solid {tokens.border_color}; border-radius:8px; padding:18px; text-align:center;">
-                <div style="color:{tokens.color_normal}; font-weight:700; font-size:14px;">ðŸŸ¢ All Subsystems Nominal</div>
+                <div style="color:{tokens.color_normal}; font-weight:700; font-size:14px;">🟢 All Subsystems Nominal</div>
                 <div style="color:{tokens.text_secondary}; font-size:12px; margin-top:4px;">No critical or warning-level operational anomalies detected across host hardware and processes.</div>
             </div>""",
             unsafe_allow_html=True,
@@ -126,7 +126,7 @@ def render_diagnostic_report(
         return
 
     for idx, rec in enumerate(report.recommendations):
-        color, bg, icon = sev_colors.get(rec.severity, ("#64748B", tokens.bg_card_secondary, "âšª"))
+        color, bg, icon = sev_colors.get(rec.severity, ("#64748B", tokens.bg_card_secondary, "⚪"))
         card_title = f"{icon} [{rec.severity.value}] {rec.title}"
 
         with st.expander(card_title, expanded=(idx == 0 or rec.severity in (EvidenceLevel.CRITICAL, EvidenceLevel.HIGH))):
@@ -159,7 +159,7 @@ def render_diagnostic_report(
             # 3. Root-Cause Hypothesis Callout (Matches React Cyan Callout)
             st.markdown(
                 f"<div style='background-color:rgba(56, 189, 248, 0.06); border:1px solid rgba(56, 189, 248, 0.22); border-radius:6px; padding:10px 14px; margin:10px 0; font-size:12px; color:#E0F2FE; display:flex; align-items:flex-start; gap:8px;'>"
-                f"<span style='color:{tokens.accent}; font-size:14px; flex-shrink:0;'>â„¹ï¸</span>"
+                f"<span style='color:{tokens.accent}; font-size:14px; flex-shrink:0;'>ℹ️</span>"
                 f"<div><b>Root Cause Hypothesis:</b> {rec.root_cause_hypothesis}</div>"
                 f"</div>",
                 unsafe_allow_html=True,
@@ -188,7 +188,7 @@ def render_diagnostic_report(
             if rec.remediation_steps:
                 st.markdown(
                     f"<div style='font-size:11px; font-weight:700; color:{tokens.color_normal}; text-transform:uppercase; letter-spacing:0.5px; margin:14px 0 6px 0; display:flex; align-items:center; gap:5px;'>"
-                    f"<span>ðŸ“‹ Prioritized Remediation Actions</span>"
+                    f"<span>📋 Prioritized Remediation Actions</span>"
                     f"</div>",
                     unsafe_allow_html=True,
                 )
@@ -204,7 +204,7 @@ def render_diagnostic_report(
             # 6. Mandatory Human-Review Notice
             st.markdown(
                 f"<div style='margin-top:10px; padding-top:8px; border-top:1px solid {tokens.border_subtle}; font-size:10.5px; color:{tokens.text_muted};'>"
-                f"âš ï¸ <b>Advisory Notice:</b> Remediation actions are advisory and require human operator review before manual execution. Autonomous command execution is disabled."
+                f"⚠️ <b>Advisory Notice:</b> Remediation actions are advisory and require human operator review before manual execution. Autonomous command execution is disabled."
                 f"</div>",
                 unsafe_allow_html=True,
             )

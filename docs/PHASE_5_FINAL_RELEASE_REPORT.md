@@ -1,4 +1,4 @@
-# SentinelAI â€” Phase 5 Final Release Report
+# SentinelAI — Phase 5 Final Release Report
 ## Final Release Audit, Demo Rehearsal & Hackathon Readiness
 
 **Date**: October 26, 2026
@@ -11,7 +11,7 @@
 
 ### 1. Executive Summary
 
-Phase 5 represents the final release verification, quality assurance freeze, and live demonstration rehearsal for SentinelAI. All capabilities engineered across Phases 1 through 4â€”telemetry collection, 39-feature preprocessing, SQLite WAL persistence, Isolation Forest ML anomaly scoring, FastAPI REST endpoints, local Ollama `qwen2.5:3b` AI diagnostics, deterministic fallback, and human-in-the-loop safety filtersâ€”were audited and validated on the target Windows system.
+Phase 5 represents the final release verification, quality assurance freeze, and live demonstration rehearsal for SentinelAI. All capabilities engineered across Phases 1 through 4—telemetry collection, 39-feature preprocessing, SQLite WAL persistence, Isolation Forest ML anomaly scoring, FastAPI REST endpoints, local Ollama `qwen2.5:3b` AI diagnostics, deterministic fallback, and human-in-the-loop safety filters—were audited and validated on the target Windows system.
 
 Key outcomes:
 1. **Clean-Start & Shutdown Rehearsal**: Tested `scripts/start_sentinelai.ps1` and `scripts/stop_sentinelai.ps1`. Fixed an interpolation syntax issue (`$pidToStop:`) in the shutdown script. Confirmed both services (FastAPI on port 8000 and Streamlit on port 8501) launch cleanly, report accurate readiness via HTTP probes, and terminate without leaving orphan child processes or impacting unrelated software.
@@ -136,7 +136,7 @@ Key outcomes:
 ### 9. Known Limitations and Remaining Risks
 
 1. **CPU Inference Latency**:
-   - On CPU-only hardware, `qwen2.5:3b` requires 45â€“75 seconds per diagnostic query.
+   - On CPU-only hardware, `qwen2.5:3b` requires 45–75 seconds per diagnostic query.
    - *Mitigation*: The dashboard displays an informative progress spinner explaining that inference runs locally on CPU without external API costs. The deterministic fallback path (<60ms) provides an immediate demonstration alternative.
 2. **Platform Focus**:
    - Host metrics and PowerShell diagnostic commands are optimized for Windows. Extensibility for Linux (`/proc`, `sysfs`, `systemd`) is architected in `app/collectors/` and `app/utils/platform.py` but remains a planned milestone.

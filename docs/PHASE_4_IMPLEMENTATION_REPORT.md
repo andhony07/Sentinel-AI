@@ -1,4 +1,4 @@
-# SentinelAI â€” Phase 4 Implementation Report
+# SentinelAI — Phase 4 Implementation Report
 ## Deployment Readiness, Configuration Hardening & Hackathon Demo Preparation
 
 **Date**: October 26, 2026
@@ -15,8 +15,8 @@ Phase 4 of SentinelAI focused on transitioning the audited codebase from an acti
 All primary goals have been accomplished:
 1. **Configuration Hardening & Zero-Config Resilience**: Audited `.env.example`, `app/core/config.py`, and `app/api/dependencies.py`. Defaulted empty or missing environment variables (`AI_TIMEOUT_SECONDS`, `AI_MODEL_NAME`, `AI_TEMPERATURE`, `AI_BASE_URL`) to safe fallbacks, preventing startup crashes.
 2. **Reproducible Launch & Safe Shutdown**: Created `scripts/start_sentinelai.ps1` and `scripts/stop_sentinelai.ps1`. The launcher validates the virtual environment, file existence, and port availability (8000 and 8501), probes Ollama reachability, and safely starts both the FastAPI backend and Streamlit dashboard with dedicated log redirection. The shutdown script terminates only the processes listening on those ports, avoiding accidental termination of unrelated user processes.
-3. **Service & AI Status Clarity**: Decoupled API health from AI model availability. Added non-blocking status checks in `app/ai/client.py` and exposed `ollama_available`, `model_available`, `fallback_active`, and `cached_diagnosis_source` on `GET /api/ai/status`. Updated the Streamlit dashboard with clear sidebar indicators, latency expectations (~45â€“75s CPU inference), and automatic fallback notices.
-4. **Hackathon Demonstration Guide**: Authored `docs/HACKATHON_DEMO_GUIDE.md`, providing a concise 5â€“7 minute script covering normal monitoring, synthetic anomaly simulation, ML health updates, AI diagnostics, deterministic fallback testing, and human-in-the-loop safety.
+3. **Service & AI Status Clarity**: Decoupled API health from AI model availability. Added non-blocking status checks in `app/ai/client.py` and exposed `ollama_available`, `model_available`, `fallback_active`, and `cached_diagnosis_source` on `GET /api/ai/status`. Updated the Streamlit dashboard with clear sidebar indicators, latency expectations (~45–75s CPU inference), and automatic fallback notices.
+4. **Hackathon Demonstration Guide**: Authored `docs/HACKATHON_DEMO_GUIDE.md`, providing a concise 5–7 minute script covering normal monitoring, synthetic anomaly simulation, ML health updates, AI diagnostics, deterministic fallback testing, and human-in-the-loop safety.
 5. **Deployment & Troubleshooting Guide**: Authored `docs/DEPLOYMENT_AND_TROUBLESHOOTING.md`, providing prerequisite matrices, configuration tables, port conflict resolution, and diagnostic steps for five common failure scenarios.
 6. **Full Automated Verification**: Ran the full test suite (unit, integration, and Playwright E2E), verified live Ollama inference and deterministic fallback, and ensured AI safety guardrails remain strictly enforced.
 
@@ -28,12 +28,12 @@ All primary goals have been accomplished:
 | --- | --- | --- |
 | `scripts/start_sentinelai.ps1` | **Added** | Validated PowerShell launcher for SentinelAI. Checks venv, ports 8000 and 8501, core files, and launches FastAPI and Streamlit into background processes with logs. |
 | `scripts/stop_sentinelai.ps1` | **Added** | Safe PowerShell shutdown script that targets only processes bound to ports 8000 and 8501 without touching unrelated processes. |
-| `docs/HACKATHON_DEMO_GUIDE.md` | **Added** | Concise, judge-friendly 5â€“7 minute demonstration script with fallback-first options and state restoration instructions. |
+| `docs/HACKATHON_DEMO_GUIDE.md` | **Added** | Concise, judge-friendly 5–7 minute demonstration script with fallback-first options and state restoration instructions. |
 | `docs/DEPLOYMENT_AND_TROUBLESHOOTING.md` | **Added** | Comprehensive deployment, configuration, port troubleshooting, and service maintenance documentation. |
 | `app/core/config.py` | **Modified** | Hardened `load_config()` to safely parse empty or missing AI settings strings into safe defaults. |
 | `app/ai/client.py` | **Modified** | Added `check_availability()` and `check_availability_sync()` methods with a 2-second timeout to probe Ollama health non-blockingly. |
 | `app/api/routes/ai.py` | **Modified** | Enhanced `GET /api/ai/status` to report `ollama_available`, `model_available`, `fallback_active`, and `cached_diagnosis_source`. |
-| `app/dashboard/dashboard_main.py` | **Modified** | Added sidebar AI status indicators, CPU inference latency notices (~45â€“75s), and transparent fallback status badges. |
+| `app/dashboard/dashboard_main.py` | **Modified** | Added sidebar AI status indicators, CPU inference latency notices (~45–75s), and transparent fallback status badges. |
 | `tests/test_ai_client.py` | **Modified** | Added test coverage for `check_availability()` and `check_availability_sync()`. |
 | `tests/test_ai_routes.py` | **Modified** | Updated route tests to validate new status fields. |
 | `README.md` | **Modified** | Updated project tree, Quick Start instructions with launcher scripts, documentation links, and command references. |
@@ -88,13 +88,13 @@ All primary goals have been accomplished:
 
 ### 5. Demo Workflow
 
-The complete, judge-tested 5â€“7 minute walkthrough is documented in `docs/HACKATHON_DEMO_GUIDE.md`:
+The complete, judge-tested 5–7 minute walkthrough is documented in `docs/HACKATHON_DEMO_GUIDE.md`:
 1. **Introduction (1 min)**: Introduce SentinelAI as an explainable, AI-augmented server health monitoring platform.
 2. **Baseline Health Overview (1 min)**: View live CPU, RAM, Disk, and Network telemetry on the Streamlit dashboard; show that Health Score is ~100/100 and Risk Category is `Normal`.
-3. **Synthetic Anomaly Simulation (1 min)**: Trigger safe `cpu_spike` or `memory_leak` synthetic anomaly from the dashboard. Show immediate update: Anomaly Score rises to ~0.76â€“0.82, Health Score drops to ~30â€“45, and Risk Category transitions to `High`.
+3. **Synthetic Anomaly Simulation (1 min)**: Trigger safe `cpu_spike` or `memory_leak` synthetic anomaly from the dashboard. Show immediate update: Anomaly Score rises to ~0.76–0.82, Health Score drops to ~30–45, and Risk Category transitions to `High`.
 4. **AI Incident Diagnosis (1.5 min)**:
    - Click "Analyze Current Telemetry with AI".
-   - Transparently communicate CPU inference latency (~45â€“75 seconds) to judges.
+   - Transparently communicate CPU inference latency (~45–75 seconds) to judges.
    - Explain diagnosis card: Observed Metric, Severity, Likely Cause, Human Review Reminder, and OS-aware Remediation Suggestions.
    - *Alternative*: If presenting on a tight schedule, show the instant deterministic fallback first.
 5. **AI Safety & Human Review (0.5 min)**: Highlight that remediation commands are advisory only and cannot execute automatically without human operator review.
@@ -170,14 +170,14 @@ The complete, judge-tested 5â€“7 minute walkthrough is documented in `docs/
   - *Reason*: The project's `.venv` environment contains backend and ML packages (`fastapi`, `scikit-learn`, `streamlit`), whereas Playwright and its Chromium browser binaries are installed in the user's primary Python 3.12 environment (`C:\Users\dell5420\AppData\Local\Programs\Python\Python312`).
   - *Resolution*: Ran via `python -m pytest tests/e2e/test_dashboard_playwright.py -q`. All 10 Playwright tests passed cleanly (100% pass rate).
 - **GPU Accelerated LLM Inference**:
-  - *Reason*: Ollama is running in CPU-only mode on this host. Latency is ~45â€“75 seconds per inference. This is documented and handled transparently with clear UI progress spinners and fallback options.
+  - *Reason*: Ollama is running in CPU-only mode on this host. Latency is ~45–75 seconds per inference. This is documented and handled transparently with clear UI progress spinners and fallback options.
 
 ---
 
 ### 9. Known Defects and Limitations
 
 1. **CPU Inference Latency**:
-   - Because inference runs on the CPU without GPU acceleration, `qwen2.5:3b` requires 45â€“75 seconds per diagnostic request. The UI informs operators with a dedicated spinner message and fallback fallback notice.
+   - Because inference runs on the CPU without GPU acceleration, `qwen2.5:3b` requires 45–75 seconds per diagnostic request. The UI informs operators with a dedicated spinner message and fallback fallback notice.
 2. **Windows Focus for Process Signals**:
    - Process enumeration and diagnostic commands are optimized for Windows PowerShell (`Get-Process`, `Get-Counter`). Linux deployment is architected but remains an extensible future milestone.
 3. **Single Active Streamlit Session for Background Monitoring**:

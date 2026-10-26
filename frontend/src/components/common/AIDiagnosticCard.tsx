@@ -233,7 +233,7 @@ export const AIDiagnosticCard: React.FC<AIDiagnosticCardProps> = ({
                         className="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase bg-sky-500/15 text-sky-400 border border-sky-500/40"
                         data-testid="diagnosis-source-badge"
                       >
-                        AI-POWERED DIAGNOSIS â€¢ {diagnosis.model_used.toUpperCase()}
+                        AI-POWERED DIAGNOSIS • {diagnosis.model_used.toUpperCase()}
                       </span>
                     )}
                     <span className="text-xs text-slate-400">
@@ -244,11 +244,11 @@ export const AIDiagnosticCard: React.FC<AIDiagnosticCardProps> = ({
                   <div className="text-xs text-slate-400" data-testid="diagnosis-latency-badge">
                     {diagnosis.is_fallback ? (
                       <span className="text-amber-400/90">
-                        Ollama unavailable or disabled â€¢ Latency: <b className="font-mono">{diagnosis.latency_ms.toFixed(1)}ms</b>
+                        AI service unavailable or offline • Latency: <b className="font-mono">{diagnosis.latency_ms.toFixed(1)}ms</b>
                       </span>
                     ) : (
                       <span className="text-sky-400/90">
-                        Model: <b>{diagnosis.model_used}</b> â€¢ Latency: <b className="font-mono">{diagnosis.latency_ms.toFixed(1)}ms</b>
+                        Model: <b>{diagnosis.model_used}</b> • Latency: <b className="font-mono">{diagnosis.latency_ms.toFixed(1)}ms</b>
                       </span>
                     )}
                   </div>
@@ -325,7 +325,7 @@ export const AIDiagnosticCard: React.FC<AIDiagnosticCardProps> = ({
               {diagnosis.probable_causes && diagnosis.probable_causes.length > 0 && (
                 <div className="space-y-2.5" data-testid="ai-probable-causes-section">
                   <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <span>ðŸ”</span>
+                    <span>🔍</span>
                     <span>Evidence-Based Probable Causes</span>
                   </div>
 
@@ -381,7 +381,7 @@ export const AIDiagnosticCard: React.FC<AIDiagnosticCardProps> = ({
               {diagnosis.investigation_steps && diagnosis.investigation_steps.length > 0 && (
                 <div className="space-y-2.5" data-testid="ai-investigation-steps-section">
                   <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <span>ðŸ”¬</span>
+                    <span>🔬</span>
                     <span>Prioritized Investigation Steps</span>
                   </div>
 
@@ -405,7 +405,7 @@ export const AIDiagnosticCard: React.FC<AIDiagnosticCardProps> = ({
               {diagnosis.remediation_actions && diagnosis.remediation_actions.length > 0 && (
                 <div className="space-y-2.5" data-testid="ai-remediation-runbook-section">
                   <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <span>ðŸ› ï¸</span>
+                    <span>🛠️</span>
                     <span>Prioritized Remediation Runbook (Human Review Required)</span>
                   </div>
 
@@ -444,17 +444,17 @@ export const AIDiagnosticCard: React.FC<AIDiagnosticCardProps> = ({
                               </div>
                               <div className="text-[10px] text-slate-400 flex items-center gap-1 italic">
                                 <AlertTriangle className="w-3 h-3 text-amber-400" />
-                                <span>Manual review required â€” command execution is disabled</span>
+                                <span>Manual review required — command execution is disabled</span>
                               </div>
                             </div>
                           ) : (
                             <div className="text-xs text-slate-500 italic">
-                              [No automated command provided â€¢ manual inspection required]
+                              [No automated command provided • manual inspection required]
                             </div>
                           )}
 
                           <div className="text-xs text-slate-400 italic">
-                            â€¢ {act.precautions}
+                            • {act.precautions}
                           </div>
                         </div>
                       );

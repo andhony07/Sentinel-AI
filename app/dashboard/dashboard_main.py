@@ -47,8 +47,8 @@ def configure_page() -> None:
     """Configure Streamlit page title and layout safely."""
     try:
         st.set_page_config(
-            page_title="SentinelAI â€” Intelligent Infrastructure Monitoring",
-            page_icon="ðŸ›¡ï¸",
+            page_title="SentinelAI — Intelligent Infrastructure Monitoring",
+            page_icon="🛡️",
             layout="wide",
             initial_sidebar_state="expanded",
         )
@@ -82,7 +82,7 @@ def main() -> None:
         st.markdown(
             """<div style="padding: 4px 0 14px 0; border-bottom: 1px solid #293548; margin-bottom: 14px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                    <span style="background: rgba(56, 189, 248, 0.16); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 800; letter-spacing: 0.8px;">ðŸ›¡ï¸ SENTINELAI</span>
+                    <span style="background: rgba(56, 189, 248, 0.16); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 800; letter-spacing: 0.8px;">🛡️ SENTINELAI</span>
                     <span style="font-size: 11px; color: #94A3B8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Infrastructure Console</span>
                 </div>
                 <h3 style="margin: 0 0 2px 0; font-size: 16px; font-weight: 700; color: #F8FAFC; letter-spacing: -0.3px; line-height: 1.3;">
@@ -99,13 +99,13 @@ def main() -> None:
         page = st.radio(
             label="Select View",
             options=[
-                "ðŸ“Š System Overview",
-                "ðŸ›¡ï¸ Health & Failure Risk",
-                "ðŸ§ª Anomaly Simulation Lab",
-                "âš¡ Real-Time Monitoring",
-                "ðŸ“ˆ Telemetry History",
-                "ðŸ” Incident & Audit Trail",
-                "ðŸ—„ï¸ System Operations",
+                "📊 System Overview",
+                "🛡️ Health & Failure Risk",
+                "🧪 Anomaly Simulation Lab",
+                "⚡ Real-Time Monitoring",
+                "📈 Telemetry History",
+                "🔍 Incident & Audit Trail",
+                "🗄️ System Operations",
             ],
             index=0,
             label_visibility="collapsed",
@@ -115,7 +115,7 @@ def main() -> None:
         st.markdown("<div style='font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px;'>Live Controls</div>", unsafe_allow_html=True)
 
         # Snapshot button
-        if st.button("ðŸ“¸ Capture Live Snapshot", width="stretch", type="primary"):
+        if st.button("📸 Capture Live Snapshot", width="stretch", type="primary"):
             with st.spinner("Capturing live telemetry sample..."):
                 _, pred, err = service.capture_live_snapshot(persist=True)
                 if err:
@@ -127,12 +127,12 @@ def main() -> None:
         # Background monitoring toggle
         is_bg_running = service.is_background_monitoring_running()
         if is_bg_running:
-            if st.button("â¹ï¸ Stop Background Worker", width="stretch"):
+            if st.button("⏹️ Stop Background Worker", width="stretch"):
                 service.stop_background_monitoring()
                 st.info("Stopped background monitoring thread.")
                 st.rerun()
         else:
-            if st.button("â–¶ï¸ Start Background Worker", width="stretch"):
+            if st.button("▶️ Start Background Worker", width="stretch"):
                 service.start_background_monitoring()
                 st.success("Started background monitoring thread.")
                 st.rerun()
@@ -148,7 +148,7 @@ def main() -> None:
             disabled=not auto_refresh,
         )
 
-        if st.button("ðŸ”„ Refresh Now", width="stretch"):
+        if st.button("🔄 Refresh Now", width="stretch"):
             st.rerun()
 
         st.markdown("<hr style='margin:14px 0; border:none; border-top:1px solid #293548;'>", unsafe_allow_html=True)
@@ -159,9 +159,9 @@ def main() -> None:
 
         st.markdown("<div style='font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px;'>Runtime &amp; Storage Engine</div>", unsafe_allow_html=True)
         st.caption(f"**ML Engine:** `{model_name}`")
-        st.caption(f"**ML Status:** {'ðŸŸ¢ Trained Artifact' if is_model_trained else 'âš ï¸ Heuristic Baseline'}")
-        st.caption(f"**AI Engine:** `{settings.ai_model_name}` ({'ðŸŸ¢ Enabled' if settings.ai_enabled else 'âšª Disabled'})")
-        st.caption(f"**Collector Worker:** {'ðŸŸ¢ Active' if is_bg_running else 'âšª Idle'}")
+        st.caption(f"**ML Status:** {'🟢 Trained Artifact' if is_model_trained else '⚠️ Heuristic Baseline'}")
+        st.caption(f"**AI Engine:** `{settings.ai_model_name}` ({'🟢 Enabled' if settings.ai_enabled else '⚪ Disabled'})")
+        st.caption(f"**Collector Worker:** {'🟢 Active' if is_bg_running else '⚪ Idle'}")
         st.caption(f"**SQLite Persistence:** `{summary['counts']['system_metrics']:,}` samples")
 
     # Dark mode is the sole user-facing theme for this AIOps Command Center redesign
@@ -194,7 +194,7 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page 1: System Overview
     # -------------------------------------------------------------------------
-    if page in ("ðŸ“Š System Overview", "ðŸ“Š Overview"):
+    if page in ("📊 System Overview", "📊 Overview"):
         # Section Header
         st.markdown(
             f"""<div style='margin-bottom:14px;'>
@@ -224,7 +224,7 @@ def main() -> None:
             else:
                 st.markdown(
                     f"""<div class="sentinel-empty-state aiops-empty-state">
-                        <div style="font-size:24px;">ðŸ“Š</div>
+                        <div style="font-size:24px;">📊</div>
                         <div class="title">Resource Saturation Unavailable</div>
                         <div class="desc">No active telemetry readings have been recorded. Click "Capture Live Snapshot" in the sidebar to acquire initial hardware readings.</div>
                     </div>""",
@@ -240,7 +240,7 @@ def main() -> None:
             if latest_pred is not None:
                 badge = get_theme_risk_badge(latest_pred.risk_category, theme="dark")
                 health_val = f"{latest_pred.health_score:.1f} / 100" if latest_pred.health_score is not None else "N/A"
-                decision_status = "âš ï¸ Statistical Outlier" if latest_pred.is_anomaly else "ðŸŸ¢ Nominal Cluster"
+                decision_status = "⚠️ Statistical Outlier" if latest_pred.is_anomaly else "🟢 Nominal Cluster"
                 decision_color = tokens.color_critical if latest_pred.is_anomaly else tokens.color_normal
 
                 warning_html = ""
@@ -292,7 +292,7 @@ def main() -> None:
             else:
                 st.markdown(
                     f"""<div class="sentinel-empty-state aiops-empty-state">
-                        <div style="font-size:24px;">ðŸ›¡ï¸</div>
+                        <div style="font-size:24px;">🛡️</div>
                         <div class="title">Health Evaluation Unavailable</div>
                         <div class="desc">No machine learning health predictions have been evaluated yet. Click "Capture Live Snapshot" in the sidebar to run ML inference.</div>
                     </div>""",
@@ -328,7 +328,7 @@ def main() -> None:
         else:
             st.markdown(
                 f"""<div class="sentinel-empty-state aiops-empty-state">
-                    <div style="font-size:24px;">ðŸ—„ï¸</div>
+                    <div style="font-size:24px;">🗄️</div>
                     <div class="title">No Ingestion Records Found</div>
                     <div class="desc">No recent telemetry samples have been persisted into SQLite yet.</div>
                 </div>""",
@@ -338,7 +338,7 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page 2: Health & Risk Analysis
     # -------------------------------------------------------------------------
-    elif page in ("ðŸ›¡ï¸ Health & Failure Risk", "ðŸ›¡ï¸ Health & Risk Analysis"):
+    elif page in ("🛡️ Health & Failure Risk", "🛡️ Health & Risk Analysis"):
         # Section Header
         st.markdown(
             (
@@ -356,7 +356,7 @@ def main() -> None:
             health_str = f"{latest_pred.health_score:.1f}" if latest_pred.health_score is not None else "N/A"
             health_color = badge["color"]
             anomaly_str = f"{latest_pred.anomaly_score:.4f}"
-            anomaly_status = "âš ï¸ Outlier Detected" if latest_pred.is_anomaly else "ðŸŸ¢ Nominal Baseline"
+            anomaly_status = "⚠️ Outlier Detected" if latest_pred.is_anomaly else "🟢 Nominal Baseline"
             anomaly_status_color = tokens.color_critical if latest_pred.is_anomaly else tokens.color_normal
 
             # Telemetry indicators
@@ -443,7 +443,7 @@ def main() -> None:
             st.markdown(
                 (
                     f"<div class=\"aiops-empty-state\" style='margin-bottom:16px;'>"
-                    f"<div style=\"font-size:24px;\">ðŸ›¡ï¸</div>"
+                    f"<div style=\"font-size:24px;\">🛡️</div>"
                     f"<div class=\"title\">Executive Health Evaluation Unavailable</div>"
                     f"<div class=\"desc\">No active machine learning inference record found. Ingest live telemetry or trigger an anomaly simulation to compute composite health and failure risk.</div>"
                     f"</div>"
@@ -471,7 +471,7 @@ def main() -> None:
             ("Low", "0.35 - 0.55", "65 - 79", "#38BDF8", "Mild metric variance; well within normal parameters."),
             ("Moderate", "0.55 - 0.75", "45 - 64", "#F59E0B", "Noticeable divergence from normal baseline cluster."),
             ("High", "0.75 - 0.90", "25 - 44", "#F97316", "Significant behavioral outlier; review workload/processes."),
-            ("Critical", "â‰¥ 0.90", "0 - 24", "#EF4444", "Severe anomaly or hardware saturation â‰¥95%."),
+            ("Critical", "≥ 0.90", "0 - 24", "#EF4444", "Severe anomaly or hardware saturation ≥95%."),
         ]
 
         active_cat = latest_pred.risk_category.value if latest_pred else ""
@@ -493,7 +493,7 @@ def main() -> None:
                     f"<div style='border:{border_style}; background-color:{bg_style}; {shadow_style} padding:14px; border-radius:8px; height:185px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between;'>"
                     f"<div>"
                     f"<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;'>"
-                    f"<span style='color:{col}; font-size:14px; font-weight:800; display:flex; align-items:center; gap:4px;'>â— {name}</span>"
+                    f"<span style='color:{col}; font-size:14px; font-weight:800; display:flex; align-items:center; gap:4px;'>● {name}</span>"
                     f"{active_badge}"
                     f"</div>"
                     f"<div style='font-size:11px; color:{tokens.text_secondary}; margin-top:4px;'><b>Anomaly:</b> <span style='color:{tokens.text_primary}; font-variant-numeric:tabular-nums;'>{thresh}</span></div>"
@@ -512,19 +512,19 @@ def main() -> None:
         # AI Diagnostic Assistant (SentinelAI)
         # ---------------------------------------------------------------------
         st.markdown("<div style='margin-top:24px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### ðŸ¤– SentinelAI Diagnostic Assistant")
+        st.markdown("#### 🤖 SentinelAI Diagnostic Assistant")
         st.caption("Synthesizes live telemetry, top processes, and ML anomaly evaluations into an evidence-grounded incident runbook.")
 
         col_ai_btn, col_ai_info = st.columns([1.5, 3.0])
         with col_ai_btn:
-            if st.button("ðŸ§  Generate AI Diagnosis", key="btn_gen_ai_diag", type="primary"):
+            if st.button("🧠 Generate AI Diagnosis", key="btn_gen_ai_diag", type="primary"):
                 provider_desc = "Gemma 4 via Gemini API" if service.settings.ai_provider == "gemma" else "AI assistant"
                 with st.spinner(f"Synthesizing telemetry with {provider_desc} (automatic fallback on timeout)..."):
                     ai_diag = service.ai_service.diagnose_latest_sync()
                     st.session_state["latest_ai_diagnosis"] = ai_diag
 
         with col_ai_info:
-            ai_status_text = "ðŸŸ¢ Active" if service.settings.ai_enabled else "âšª Disabled"
+            ai_status_text = "🟢 Active" if service.settings.ai_enabled else "⚪ Disabled"
             provider_title = "Google Gemma 4" if service.settings.ai_provider == "gemma" else service.settings.ai_provider.upper()
             st.markdown(
                 f"<div style='font-size:11px; color:#94A3B8; padding-top:4px;'>"
@@ -541,7 +541,7 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page: Anomaly Simulation
     # -------------------------------------------------------------------------
-    elif page in ("ðŸ§ª Anomaly Simulation Lab", "ðŸ§ª Anomaly Simulation"):
+    elif page in ("🧪 Anomaly Simulation Lab", "🧪 Anomaly Simulation"):
         st.markdown(
             '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">'
             '<div>'
@@ -560,7 +560,7 @@ def main() -> None:
 
         with col_scen:
             scenarios = list(SCENARIO_PROFILES.keys())
-            scenario_labels = [f"{SCENARIO_PROFILES[s].name} â€” ({SCENARIO_PROFILES[s].stress_subsystem})" for s in scenarios]
+            scenario_labels = [f"{SCENARIO_PROFILES[s].name} — ({SCENARIO_PROFILES[s].stress_subsystem})" for s in scenarios]
             selected_idx = st.selectbox(
                 "Select Deterministic Anomaly Scenario Profile",
                 options=range(len(scenarios)),
@@ -596,7 +596,7 @@ def main() -> None:
             )
             sim_seed = st.number_input("Deterministic Random Seed", min_value=1, max_value=99999, value=42, step=1)
             persist_sim = st.checkbox("Commit Sample to SQLite", value=False, help="Persist the generated telemetry and 39-feature vector into the database.")
-            run_sim = st.button("ðŸš€ Run Anomaly Simulation", type="primary", width="stretch")
+            run_sim = st.button("🚀 Run Anomaly Simulation", type="primary", width="stretch")
 
         if run_sim or "last_sim_result" in st.session_state:
             if run_sim:
@@ -725,8 +725,8 @@ def main() -> None:
             st.markdown("#### 4. SentinelAI Incident Runbook &amp; Diagnosis")
             col_sim_ai, col_sim_info = st.columns([1.8, 2.5])
             with col_sim_ai:
-                if st.button("ðŸ§  Generate AI Diagnosis for Scenario", key=f"btn_sim_ai_{selected_scenario.value}"):
-                    with st.spinner("Synthesizing simulation telemetry into AI runbook (CPU inference ~45â€“75s; automatic fallback on timeout)..."):
+                if st.button("🧠 Generate AI Diagnosis for Scenario", key=f"btn_sim_ai_{selected_scenario.value}"):
+                    with st.spinner("Synthesizing simulation telemetry into AI runbook (CPU inference ~45–75s; automatic fallback on timeout)..."):
                         sim_ai_diag = service.ai_service.diagnose_simulation_sync(
                             scenario=selected_scenario,
                             persist=False,
@@ -751,7 +751,7 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page: Real-Time Monitoring
     # -------------------------------------------------------------------------
-    elif page in ("âš¡ Real-Time Monitoring",):
+    elif page in ("⚡ Real-Time Monitoring",):
         st.markdown(
             '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">'
             '<div>'
@@ -776,14 +776,14 @@ def main() -> None:
                     '<div style="display: flex; align-items: center; justify-content: space-between;">'
                     '<div>'
                     '<div style="font-size: 11px; font-weight: 700; color: #10B981; text-transform: uppercase; letter-spacing: 0.6px;">Collector Worker Status</div>'
-                    '<div style="font-size: 15px; font-weight: 700; color: #F8FAFC; margin-top: 2px;">ðŸŸ¢ ACTIVE â€” Ingesting Background Telemetry</div>'
+                    '<div style="font-size: 15px; font-weight: 700; color: #F8FAFC; margin-top: 2px;">🟢 ACTIVE — Ingesting Background Telemetry</div>'
                     '</div>'
                     '<span style="font-size: 11px; color: #94A3B8; background: #111827; padding: 3px 8px; border-radius: 4px; border: 1px solid #293548;">Thread Safe</span>'
                     '</div>'
                     '</div>',
                     unsafe_allow_html=True,
                 )
-                if st.button("â¹ï¸ Stop Collector Thread", key="btn_stop_worker", width="stretch"):
+                if st.button("⏹️ Stop Collector Thread", key="btn_stop_worker", width="stretch"):
                     service.stop_background_monitoring()
                     st.rerun()
             else:
@@ -792,14 +792,14 @@ def main() -> None:
                     '<div style="display: flex; align-items: center; justify-content: space-between;">'
                     '<div>'
                     '<div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.6px;">Collector Worker Status</div>'
-                    '<div style="font-size: 15px; font-weight: 700; color: #F8FAFC; margin-top: 2px;">âšª STOPPED â€” Idle / External Daemon Mode</div>'
+                    '<div style="font-size: 15px; font-weight: 700; color: #F8FAFC; margin-top: 2px;">⚪ STOPPED — Idle / External Daemon Mode</div>'
                     '</div>'
                     '<span style="font-size: 11px; color: #94A3B8; background: #111827; padding: 3px 8px; border-radius: 4px; border: 1px solid #293548;">Standby</span>'
                     '</div>'
                     '</div>',
                     unsafe_allow_html=True,
                 )
-                if st.button("â–¶ï¸ Start Collector Thread", key="btn_start_worker", type="primary", width="stretch"):
+                if st.button("▶️ Start Collector Thread", key="btn_start_worker", type="primary", width="stretch"):
                     service.start_background_monitoring()
                     st.rerun()
 
@@ -811,7 +811,7 @@ def main() -> None:
                 '</div>',
                 unsafe_allow_html=True,
             )
-            if st.button("âš¡ Trigger Snapshot Now", key="btn_trigger_snapshot", width="stretch"):
+            if st.button("⚡ Trigger Snapshot Now", key="btn_trigger_snapshot", width="stretch"):
                 with st.spinner("Harvesting live hardware telemetry..."):
                     rec, pred, err = service.capture_live_snapshot(persist=True)
                     if err:
@@ -866,7 +866,7 @@ def main() -> None:
                 st.markdown(
                     f'<div class="sentinel-card aiops-metric-card">'
                     f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Inference Pipeline</div>'
-                    f'<div style="font-size:15px; font-weight:700; color:{m_color}; margin-top:6px;">âš¡ {m_label}</div>'
+                    f'<div style="font-size:15px; font-weight:700; color:{m_color}; margin-top:6px;">⚡ {m_label}</div>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )
@@ -894,14 +894,14 @@ def main() -> None:
                     "Disk (%)": disk_str,
                     "TX (KB/s)": f"{tx_kb:,.1f}",
                     "RX (KB/s)": f"{rx_kb:,.1f}",
-                    "Dominant Process": f"{rm.top_process_name or 'N/A'} (PID: {rm.top_process_pid or 'â€”'})",
+                    "Dominant Process": f"{rm.top_process_name or 'N/A'} (PID: {rm.top_process_pid or '—'})",
                 })
             st.dataframe(table_rows, width="stretch", hide_index=True)
 
     # -------------------------------------------------------------------------
     # Page 4: Historical Telemetry
     # -------------------------------------------------------------------------
-    elif page in ("ðŸ“ˆ Telemetry History", "ðŸ“ˆ Historical Telemetry"):
+    elif page in ("📈 Telemetry History", "📈 Historical Telemetry"):
         st.markdown(
             '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">'
             '<div>'
@@ -1026,7 +1026,7 @@ def main() -> None:
                     limit=settings.dashboard_historical_limit,
                 )
                 st.download_button(
-                    label="â¬‡ï¸ Export Telemetry CSV",
+                    label="⬇️ Export Telemetry CSV",
                     data=csv_metrics,
                     file_name=f"telemetry_metrics_{now.strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
@@ -1036,7 +1036,7 @@ def main() -> None:
             fig_ts = build_multi_metric_timeseries(hist_records, selected_metrics=selected_metrics, theme="dark")
             st.plotly_chart(fig_ts, width="stretch")
 
-            with st.expander("ðŸ“„ View Historical Records Table", expanded=False):
+            with st.expander("📄 View Historical Records Table", expanded=False):
                 df_hist = pd.DataFrame(
                     [
                         {
@@ -1047,8 +1047,8 @@ def main() -> None:
                             "Disk Active (%)": f"{r.disk_active_percent:.1f}%" if r.disk_active_percent is not None else "N/A",
                             "TX (KB/s)": f"{((r.network_bytes_sent_per_sec or 0.0) / 1024.0):,.1f}",
                             "RX (KB/s)": f"{((r.network_bytes_recv_per_sec or 0.0) / 1024.0):,.1f}",
-                            "Processes": r.process_count if r.process_count is not None else "â€”",
-                            "Top Process": f"{r.top_process_name or 'N/A'} (PID: {r.top_process_pid or 'â€”'})",
+                            "Processes": r.process_count if r.process_count is not None else "—",
+                            "Top Process": f"{r.top_process_name or 'N/A'} (PID: {r.top_process_pid or '—'})",
                         }
                         for r in hist_records
                     ]
@@ -1057,7 +1057,7 @@ def main() -> None:
         else:
             st.markdown(
                 f"""<div class="sentinel-empty-state aiops-empty-state">
-                    <div style="font-size:28px;">ðŸ“ˆ</div>
+                    <div style="font-size:28px;">📈</div>
                     <div class="title">No Historical Telemetry Recorded</div>
                     <div class="desc">No sensor telemetry was found in SQLite within the selected time window ({time_range}). Capture a live snapshot or start the background collector worker to begin logging historical telemetry.</div>
                 </div>""",
@@ -1067,7 +1067,7 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page 5: Anomaly Audit Log
     # -------------------------------------------------------------------------
-    elif page in ("ðŸ” Incident & Audit Trail", "ðŸ” Anomaly Audit Log"):
+    elif page in ("🔍 Incident & Audit Trail", "🔍 Anomaly Audit Log"):
         st.markdown(
             '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">'
             '<div>'
@@ -1171,7 +1171,7 @@ def main() -> None:
             with col_m2:
                 csv_anom = service.export_anomalies_csv(limit=limit, filter_anomalies_only=filter_anom)
                 st.download_button(
-                    label="â¬‡ï¸ Export Audit Log CSV",
+                    label="⬇️ Export Audit Log CSV",
                     data=csv_anom,
                     file_name=f"anomaly_audit_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
@@ -1183,7 +1183,7 @@ def main() -> None:
                     {
                         "Timestamp (UTC)": format_timestamp(a["timestamp"]),
                         "Anomaly Score": f"{a['anomaly_score']:.4f}",
-                        "Outlier Flag": "ðŸ”´ YES" if a["is_anomaly"] else "ðŸŸ¢ NO",
+                        "Outlier Flag": "🔴 YES" if a["is_anomaly"] else "🟢 NO",
                         "Risk Tier": a["risk_category"],
                         "Health Score": f"{a['health_score']:.1f}/100" if a["health_score"] is not None else "N/A",
                         "CPU (%)": f"{a.get('cpu_percent', 0.0):.1f}%",
@@ -1199,11 +1199,11 @@ def main() -> None:
             # Investigation Inspector for a Selected Anomaly
             if filtered:
                 st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
-                st.markdown("#### ðŸ”¬ Detailed Event Diagnostics &amp; Feature Inspector")
+                st.markdown("#### 🔬 Detailed Event Diagnostics &amp; Feature Inspector")
                 st.caption("Select any recorded evaluation from the audit log to inspect its underlying telemetry evidence and diagnostic recommendations.")
 
                 event_options = [
-                    f"#{filtered[i]['feature_id']} â€” {format_timestamp(filtered[i]['timestamp'])} â€” Score: {filtered[i]['anomaly_score']:.4f} ({filtered[i]['risk_category']})"
+                    f"#{filtered[i]['feature_id']} — {format_timestamp(filtered[i]['timestamp'])} — Score: {filtered[i]['anomaly_score']:.4f} ({filtered[i]['risk_category']})"
                     for i in range(len(filtered))
                 ]
                 sel_idx = st.selectbox("Select Anomaly Evaluation Event to Inspect", options=range(len(filtered)), format_func=lambda i: event_options[i])
@@ -1225,7 +1225,7 @@ def main() -> None:
         else:
             st.markdown(
                 f"""<div class="sentinel-empty-state aiops-empty-state">
-                    <div style="font-size:28px;">ðŸ”</div>
+                    <div style="font-size:28px;">🔍</div>
                     <div class="title">No Anomaly History Available</div>
                     <div class="desc">No historical feature vectors are available in SQLite to evaluate. Capture a snapshot or run the background collector worker to begin logging audit evaluations.</div>
                 </div>""",
@@ -1235,7 +1235,7 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page 6: Database & Operational Status
     # -------------------------------------------------------------------------
-    elif page in ("ðŸ—„ï¸ System Operations", "ðŸ—„ï¸ Database & Operational Status", "ðŸ—„ï¸ Database Inspection"):
+    elif page in ("🗄️ System Operations", "🗄️ Database & Operational Status", "🗄️ Database Inspection"):
         st.markdown(
             '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">'
             '<div>'
@@ -1256,13 +1256,13 @@ def main() -> None:
         overall = op_status["overall_status"]
         if overall == "HEALTHY":
             status_color = "#10B981"
-            status_icon = "ðŸŸ¢"
+            status_icon = "🟢"
         elif overall == "DEGRADED":
             status_color = "#F59E0B"
-            status_icon = "ðŸŸ¡"
+            status_icon = "🟡"
         else:
             status_color = "#EF4444"
-            status_icon = "ðŸ”´"
+            status_icon = "🔴"
 
         banner_html = (
             f'<div class="sentinel-card aiops-metric-card" style="border-left:4px solid {status_color}; margin-bottom:18px;">'
@@ -1281,12 +1281,12 @@ def main() -> None:
         st.markdown(banner_html, unsafe_allow_html=True)
 
         # Subsystems Status Cards
-        st.markdown("#### ðŸ¥ Subsystem Operational Health Checks")
+        st.markdown("#### 🏥 Subsystem Operational Health Checks")
         sc1, sc2, sc3, sc4 = st.columns(4)
 
         with sc1:
             db_sub = op_status["subsystems"]["database"]
-            db_icon = "ðŸŸ¢" if db_sub["status"] == "OPERATIONAL" else "ðŸ”´"
+            db_icon = "🟢" if db_sub["status"] == "OPERATIONAL" else "🔴"
             st.markdown(
                 f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">SQLite Persistence</div>'
@@ -1299,7 +1299,7 @@ def main() -> None:
 
         with sc2:
             ml_sub = op_status["subsystems"]["ml_engine"]
-            ml_icon = "ðŸŸ¢" if ml_sub["status"] == "OPERATIONAL" else "ðŸŸ¡"
+            ml_icon = "🟢" if ml_sub["status"] == "OPERATIONAL" else "🟡"
             st.markdown(
                 f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">ML Model Engine</div>'
@@ -1312,7 +1312,7 @@ def main() -> None:
 
         with sc3:
             col_sub = op_status["subsystems"]["collector"]
-            col_icon = "ðŸŸ¢" if col_sub["status"] == "OPERATIONAL" else "ðŸ”´"
+            col_icon = "🟢" if col_sub["status"] == "OPERATIONAL" else "🔴"
             st.markdown(
                 f'<div class="sentinel-card aiops-metric-card">'
                 f'<div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Hardware Collectors</div>'
@@ -1325,7 +1325,7 @@ def main() -> None:
 
         with sc4:
             fresh_sub = op_status["subsystems"]["telemetry_freshness"]
-            f_icon = "ðŸŸ¢" if fresh_sub["status"] == "FRESH" else ("ðŸŸ¡" if fresh_sub["status"] == "WARM" else "âšª")
+            f_icon = "🟢" if fresh_sub["status"] == "FRESH" else ("🟡" if fresh_sub["status"] == "WARM" else "⚪")
             delta_val = f"{fresh_sub['seconds_since_last_sample']}s ago" if fresh_sub['seconds_since_last_sample'] is not None else "No telemetry"
             worker_stat = op_status['subsystems']['background_worker']['status']
             st.markdown(
@@ -1339,7 +1339,7 @@ def main() -> None:
             )
 
         st.markdown("<div style='margin-top:24px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### ðŸ—„ï¸ SQLite Storage Metrics &amp; Table Capacities")
+        st.markdown("#### 🗄️ SQLite Storage Metrics &amp; Table Capacities")
 
         db_summary = service.get_database_summary()
 
@@ -1410,7 +1410,7 @@ def main() -> None:
         st.markdown("<div style='margin-top:24px;'></div>", unsafe_allow_html=True)
         col_exp_title, col_exp_btn = st.columns([2, 1])
         with col_exp_title:
-            st.markdown("#### ðŸ” Table Data &amp; Schema Explorer")
+            st.markdown("#### 🔍 Table Data &amp; Schema Explorer")
         table_choice = st.selectbox("Select Table to Inspect", ["system_metrics", "feature_vectors", "validation_logs"])
         table_limit = st.slider("Rows to Display", min_value=5, max_value=100, value=15, step=5)
 
@@ -1422,7 +1422,7 @@ def main() -> None:
                 csv_tbl = service.export_metrics_csv(limit=table_limit)
                 file_name = f"system_metrics_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
             st.download_button(
-                label=f"â¬‡ï¸ Export {table_choice} CSV",
+                label=f"⬇️ Export {table_choice} CSV",
                 data=csv_tbl,
                 file_name=file_name,
                 mime="text/csv",
@@ -1441,8 +1441,8 @@ def main() -> None:
                         "Disk (%)": f"{r.disk_percent:.1f}%" if r.disk_percent is not None else "N/A",
                         "TX (KB/s)": f"{((r.network_bytes_sent_per_sec or 0.0) / 1024.0):,.1f}",
                         "RX (KB/s)": f"{((r.network_bytes_recv_per_sec or 0.0) / 1024.0):,.1f}",
-                        "Processes": r.process_count or "â€”",
-                        "Top Process": f"{r.top_process_name or 'N/A'} (PID: {r.top_process_pid or 'â€”'})",
+                        "Processes": r.process_count or "—",
+                        "Top Process": f"{r.top_process_name or 'N/A'} (PID: {r.top_process_pid or '—'})",
                     }
                     for r in reversed(records)
                 ])
@@ -1455,7 +1455,7 @@ def main() -> None:
                 df_feat = pd.DataFrame([
                     {
                         "Feature ID": f.id,
-                        "Metric ID": f.metric_id or "â€”",
+                        "Metric ID": f.metric_id or "—",
                         "Timestamp (UTC)": format_timestamp(f.timestamp),
                         "CPU Utilization": f"{f.features.get('cpu_utilization_percent', 0.0):.1f}%",
                         "RAM Utilization": f"{f.features.get('memory_utilization_percent', 0.0):.1f}%",

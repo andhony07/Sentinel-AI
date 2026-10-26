@@ -1,7 +1,7 @@
 # SentinelAI: Final UI Unification, Premium Redesign & Release Verification Report
 
 **Product Identity:** SentinelAI
-**Descriptor:** Intelligent Infrastructure Monitoring Ã¢â‚¬Â¢ Predictive Health & Incident Intelligence
+**Descriptor:** Intelligent Infrastructure Monitoring • Predictive Health & Incident Intelligence
 **Target Repository:** `D:\SentinelAI`
 **Execution Timestamp:** 2026-10-26
 **Final Status:** **`UI CONSISTENCY VERIFIED`**
@@ -18,7 +18,7 @@ Prior to this phase, while both Streamlit (`:8501`) and React (`:5173`) carried 
    - React displayed structured diagnostic evidence cards with empirical telemetry tables (`Metric Indicator`, `Observed Value`, `Threshold Boundary`, `Severity`, `Diagnostic Description`), root cause hypotheses, and remediation runbooks.
    - Streamlit displayed a generic unformatted dataframe with disparate column headers (`Subsystem`, `Signal / Metric`, `Baseline / Threshold`), followed by basic expanders lacking per-finding empirical evidence tables and styled hypothesis callouts.
 3. **Streamlit Dimmed Diagnosis Screen:**
-   - When generating AI incident explanations (which run 45Ã¢â‚¬â€œ75 seconds on CPU), Streamlit applied aggressive page-wide opacity reduction (`opacity: 0.33` / stale overlay), causing the entire dashboard to appear grayed out, unreadable, and frozen.
+   - When generating AI incident explanations (which run 45–75 seconds on CPU), Streamlit applied aggressive page-wide opacity reduction (`opacity: 0.33` / stale overlay), causing the entire dashboard to appear grayed out, unreadable, and frozen.
 4. **Command Wrapping & Clipping:**
    - Long remediation commands (e.g. `kill -15 <pid>`, PowerShell thread termination) in diagnostic runbooks lacked dedicated scrollable horizontal containers, risking clipping on narrow laptop displays.
 
@@ -28,7 +28,7 @@ Prior to this phase, while both Streamlit (`:8501`) and React (`:5173`) carried 
 
 | Discrepancy | Root Cause | Fix Applied |
 | :--- | :--- | :--- |
-| **Dimmed Diagnosis Screen** | Streamlit default client-side rerun styling applies `opacity: 0.33` to stale element containers (`.stApp[data-test-script-state="running"] [data-testid="stVerticalBlock"]`). During 45Ã¢â‚¬â€œ75s CPU inference, the entire page dimmed. | Overrode stale container opacity with `opacity: 1 !important` in `theme.py` while rendering an elevated, high-contrast spinner card (`[data-testid="stSpinner"]`) with cyan border accent and clear status text. |
+| **Dimmed Diagnosis Screen** | Streamlit default client-side rerun styling applies `opacity: 0.33` to stale element containers (`.stApp[data-test-script-state="running"] [data-testid="stVerticalBlock"]`). During 45–75s CPU inference, the entire page dimmed. | Overrode stale container opacity with `opacity: 1 !important` in `theme.py` while rendering an elevated, high-contrast spinner card (`[data-testid="stSpinner"]`) with cyan border accent and clear status text. |
 | **Divergent Table Headers** | Streamlit `diagnostic_card.py` generated dataframe dictionaries with legacy column names instead of the 5-field schema defined in Section 6.B and used in React. | Standardized column keys to `Metric Indicator`, `Observed Value`, `Threshold Boundary`, `Severity`, and `Diagnostic Description`. |
 | **Missing Per-Finding Evidence in Streamlit** | Empirical evidence was only aggregated globally at the top of the report, leaving individual diagnostic expanders disconnected from their triggering metrics. | Embedded a dedicated per-finding telemetry evidence table directly inside each recommendation card in `diagnostic_card.py`. |
 | **Asymmetric Navigation Labels** | React `Sidebar.tsx` and `TopBar.tsx` hardcoded previous phase draft titles. | Unified React navigation items to exactly match the 7 canonical labels: `System Overview`, `Health & Failure Risk`, `Anomaly Simulation Lab`, `Real-Time Monitoring`, `Telemetry History`, `Incident & Audit Trail`, and `System Operations`. |
@@ -43,13 +43,13 @@ To ensure a cohesive, unified visual identity across frameworks without forcing 
 1. **Unified Design Tokens:**
    - **Canvas Background:** Deep near-black `#0B0F19`
    - **Sidebar Surface:** Deep navy `#111827`
-   - **Card Surfaces:** Layered dark slate `#151D2C` with subtle `#293548` borders and 6Ã¢â‚¬â€œ8px border radius
+   - **Card Surfaces:** Layered dark slate `#151D2C` with subtle `#293548` borders and 6–8px border radius
    - **Primary Accent:** Electric cyan `#38BDF8`
    - **Status Palette:** Normal `#10B981`, Low `#38BDF8`, Moderate `#F59E0B`, High `#F97316`, Critical `#EF4444`
    - **Text Contrast:** High-contrast near-white `#F8FAFC` (primary), muted slate `#94A3B8` (secondary), dark slate `#64748B` (caption/meta)
 2. **Unified Information Hierarchy (Health & Failure Risk):**
    - Headline banner with severity accent and primary concern.
-   - Dual radial gauges: System Health Score (0Ã¢â‚¬â€œ100) and Calibrated Anomaly Score.
+   - Dual radial gauges: System Health Score (0–100) and Calibrated Anomaly Score.
    - Five-Tier Operational Risk Matrix with active tier illumination.
    - Empirical Telemetry Evidence table (5 standardized columns).
    - Structured recommendation cards:
@@ -168,13 +168,13 @@ npm --prefix frontend run build
 
 vite v8.3.5 building client environment for production...
 transforming...
-Ã¢Å“â€œ 2541 modules transformed.
+✓ 2541 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                   0.73 kB Ã¢â€â€š gzip:   0.42 kB
-dist/assets/index-COqwmnpr.css   11.21 kB Ã¢â€â€š gzip:   2.70 kB
-dist/assets/index-BalwSlyN.js   741.87 kB Ã¢â€â€š gzip: 208.98 kB
-Ã¢Å“â€œ built in 1.10s
+dist/index.html                   0.73 kB │ gzip:   0.42 kB
+dist/assets/index-COqwmnpr.css   11.21 kB │ gzip:   2.70 kB
+dist/assets/index-BalwSlyN.js   741.87 kB │ gzip: 208.98 kB
+✓ built in 1.10s
 ```
 
 `npx oxlint` in `frontend/` reported **0 errors**.
@@ -198,7 +198,7 @@ While both frontends now share identical design tokens, branding, navigation lab
 
 ## 11. Remaining Defects or Limitations
 
-- **Ollama CPU Latency:** Local inference on CPU without GPU acceleration takes ~45Ã¢â‚¬â€œ75 seconds. The UI now clearly communicates this expected latency, does not dim the page, and provides immediate deterministic fallback if Ollama is unreachable or times out.
+- **Ollama CPU Latency:** Local inference on CPU without GPU acceleration takes ~45–75 seconds. The UI now clearly communicates this expected latency, does not dim the page, and provides immediate deterministic fallback if Ollama is unreachable or times out.
 - **Academic Scope:** The mandatory advisory notice remains visible on both frontends: anomaly scores describe statistical behavioral divergence and do not validate real hardware destruction.
 
 ---

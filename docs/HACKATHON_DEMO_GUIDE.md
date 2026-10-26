@@ -1,4 +1,4 @@
-# SentinelAI â€” Hackathon Demonstration Guide (5â€“7 Minute Walkthrough)
+# SentinelAI — Hackathon Demonstration Guide (5–7 Minute Walkthrough)
 
 ## Overview & Demo Goal
 
@@ -30,9 +30,9 @@ ollama serve
 
 ---
 
-## 5â€“7 Minute Demonstration Script
+## 5–7 Minute Demonstration Script
 
-### Step 1: Introduction & Problem Statement (0:00 â€“ 0:45)
+### Step 1: Introduction & Problem Statement (0:00 – 0:45)
 - **Speaker Script**:
   > *"Modern cloud and on-premise infrastructure generates thousands of raw telemetry metrics per minute. When servers experience memory leaks, runaway compute loops, or I/O saturation, operations teams face alert fatigue. Rule-based thresholds either miss subtle multivariate anomalies or trigger noisy false alarms. Furthermore, generic LLM assistants hallucinate dangerous remediation commands or try to kill critical operating system processes.*
   >
@@ -40,37 +40,37 @@ ollama serve
 
 ---
 
-### Step 2: Dashboard Overview & Live Telemetry (0:45 â€“ 1:30)
+### Step 2: Dashboard Overview & Live Telemetry (0:45 – 1:30)
 - **Action**: Navigate to [http://localhost:8501](http://localhost:8501) in your browser.
 - **Showcase**:
   1. **Top Banner**: Point to the operational status badge, active ML engine (`IsolationForestDetector`), and SQLite persistence count.
-  2. **Sidebar**: Point out the **Runtime & Storage Engine** block showing `ML Engine: IsolationForestDetector` and `AI Engine: qwen2.5:3b (ðŸŸ¢ Enabled)`.
+  2. **Sidebar**: Point out the **Runtime & Storage Engine** block showing `ML Engine: IsolationForestDetector` and `AI Engine: qwen2.5:3b (🟢 Enabled)`.
   3. **Section 1 (System Overview)**: Highlight the 5 metric cards (CPU, RAM, Disk, Network, Top Processes) and the real-time resource saturation Plotly bar chart.
-  4. **Section 2 (Health & Risk Analysis)**: Navigate to the `ðŸ›¡ï¸ Health & Risk Analysis` tab. Show the circular gauges for **Overall Health Score** (0â€“100) and **Calibrated Anomaly Score**, along with the **Five-Tier Risk Categorization Matrix** (Normal, Low, Moderate, High, Critical).
+  4. **Section 2 (Health & Risk Analysis)**: Navigate to the `🛡️ Health & Risk Analysis` tab. Show the circular gauges for **Overall Health Score** (0–100) and **Calibrated Anomaly Score**, along with the **Five-Tier Risk Categorization Matrix** (Normal, Low, Moderate, High, Critical).
 
 ---
 
-### Step 3: Safe Deterministic Anomaly Simulation (1:30 â€“ 2:30)
-- **Action**: Click on `ðŸ§ª Anomaly Simulation` in the sidebar.
+### Step 3: Safe Deterministic Anomaly Simulation (1:30 – 2:30)
+- **Action**: Click on `🧪 Anomaly Simulation` in the sidebar.
 - **Explanation**:
   > *"Rather than injecting risky hardware faults or stressing physical disks during a live review, SentinelAI includes a built-in deterministic simulation lab. It generates physically valid mathematical telemetry vectors and runs them through our full 39-feature pipeline."*
 - **Action**:
   1. Leave Scenario set to **`CPU Thread Runaway / Spike`** (or select **`Memory Leak / Exhaustion`**).
-  2. Click **ðŸš€ Run Anomaly Simulation**.
+  2. Click **🚀 Run Anomaly Simulation**.
 - **Observation**:
-  - Point to the **Execution Assessment Banner**: `ðŸ”´ ANOMALOUS OUTLIER DETECTED`.
+  - Point to the **Execution Assessment Banner**: `🔴 ANOMALOUS OUTLIER DETECTED`.
   - Show the comparative bar chart: Baseline vs. Simulated telemetry (+78% CPU increase).
-  - Show the ML evaluation: Health Score drops (e.g. from 95 to 46.8), Anomaly Score spikes, and Risk Tier elevates to `ðŸ”´ Critical Risk`.
+  - Show the ML evaluation: Health Score drops (e.g. from 95 to 46.8), Anomaly Score spikes, and Risk Tier elevates to `🔴 Critical Risk`.
 
 ---
 
-### Step 4: AI Incident Diagnosis & Runbook (2:30 â€“ 4:00)
+### Step 4: AI Incident Diagnosis & Runbook (2:30 – 4:00)
 - **Action**: Scroll down to **Section 4: SentinelAI Incident Runbook & Diagnosis**.
 - **Transparency Note on CPU Latency**:
-  > *"Because we run an open-weight 3-billion-parameter LLM locally on an Intel CPU with zero external cloud dependencies or API costs, inference takes approximately 45â€“60 seconds."*
+  > *"Because we run an open-weight 3-billion-parameter LLM locally on an Intel CPU with zero external cloud dependencies or API costs, inference takes approximately 45–60 seconds."*
 - **Choose Demo Path**:
   - **Path A (Live LLM Generation)**:
-    1. Click **ðŸ§  Generate AI Diagnosis for Scenario**.
+    1. Click **🧠 Generate AI Diagnosis for Scenario**.
     2. While the spinner is active, explain that SentinelAI synthesizes top processes, multivariate feature vectors, and ML predictions into a structured JSON schema.
     3. Once rendered, inspect the generated report.
   - **Path B (Fast 1-Second Fallback Demonstration)**:
@@ -79,12 +79,12 @@ ollama serve
   - **Incident Summary**: Contextual summary of the simulated event.
   - **Evidence-Based Causes**: Ranked hypotheses with supporting metrics (`HIGH CONFIDENCE`).
   - **Prioritized Investigation Steps**: Concrete diagnostics tailored to the host OS.
-  - **Advisory Runbook & Guardrails**: Point to the **âš ï¸ Mandatory Operator Review Required** warning banner:
+  - **Advisory Runbook & Guardrails**: Point to the **⚠️ Mandatory Operator Review Required** warning banner:
     > *"Notice that autonomous command execution is permanently disabled. SentinelAI treats all model output as untrusted advice, validates commands against the active OS, and requires human operator sign-off before execution."*
 
 ---
 
-### Step 5: Deterministic Fallback During Outages (4:00 â€“ 5:00)
+### Step 5: Deterministic Fallback During Outages (4:00 – 5:00)
 - **Speaker Script**:
   > *"What happens if the Ollama daemon crashes, runs out of memory, or exceeds timeout in a critical production outage? SentinelAI never fails open or drops observability."*
 - **Action**:
@@ -105,7 +105,7 @@ ollama serve
 
 ---
 
-### Step 6: Service Restoration & API Architecture (5:00 â€“ 6:00)
+### Step 6: Service Restoration & API Architecture (5:00 – 6:00)
 - **Action**:
   1. Restart Ollama in Terminal 1:
      ```powershell
@@ -113,14 +113,14 @@ ollama serve
      ```
   2. Open FastAPI Swagger documentation in browser: [http://localhost:8000/docs](http://localhost:8000/docs).
   3. Show the clean OpenAPI schema:
-     - `POST /api/ai/diagnose` â€” Generates on-demand incident runbooks.
-     - `GET /api/ai/status` â€” Real-time probe of Ollama reachability and fallback status.
-     - `GET /healthz` â€” Liveness check.
-     - `POST /api/simulation/run` â€” Headless simulation endpoint for automated testing.
+     - `POST /api/ai/diagnose` — Generates on-demand incident runbooks.
+     - `GET /api/ai/status` — Real-time probe of Ollama reachability and fallback status.
+     - `GET /healthz` — Liveness check.
+     - `POST /api/simulation/run` — Headless simulation endpoint for automated testing.
 
 ---
 
-### Step 7: Test Evidence & Conclusion (6:00 â€“ 7:00)
+### Step 7: Test Evidence & Conclusion (6:00 – 7:00)
 - **Key Evidence to Present**:
   - **Full Test Suite**: 344 automated tests (334 core unit/integration/ML/API tests + 10 Playwright E2E browser tests).
   - **Safety Filter**: Prohibits termination of Windows System Idle Process (PID 0), critical OS processes, and destructive commands (`rm -rf`, `format`, `taskkill /IM *`).

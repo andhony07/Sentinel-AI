@@ -31,7 +31,7 @@ def render_ai_diagnostic_card(
     if diagnosis is None:
         st.markdown(
             f"""<div style="background-color:{tokens.bg_card}; border: 1px dashed {tokens.border_color}; border-radius:8px; padding:24px; text-align:center;">
-                <div style="font-size:28px;">ðŸ¤–</div>
+                <div style="font-size:28px;">🤖</div>
                 <div style="color:{tokens.text_primary}; font-weight:700; font-size:15px; margin-top:6px;">No AI Diagnosis Generated</div>
                 <div style="color:{tokens.text_secondary}; font-size:12px; margin-top:4px;">Click 'Generate AI Diagnosis' to synthesize live telemetry, ML anomaly evaluation, and top processes into an evidence-grounded incident runbook.</div>
             </div>""",
@@ -84,7 +84,7 @@ def render_ai_diagnostic_card(
     if diagnosis.probable_causes:
         st.markdown(
             f"<div style='font-size:12px; font-weight:700; color:{tokens.text_secondary}; text-transform:uppercase; letter-spacing:0.6px; margin: 12px 0 8px 0;'>"
-            f"ðŸ” Evidence-Based Probable Causes</div>",
+            f"🔍 Evidence-Based Probable Causes</div>",
             unsafe_allow_html=True,
         )
 
@@ -115,7 +115,7 @@ def render_ai_diagnostic_card(
     if diagnosis.investigation_steps:
         st.markdown(
             f"<div style='font-size:12px; font-weight:700; color:{tokens.text_secondary}; text-transform:uppercase; letter-spacing:0.6px; margin: 16px 0 8px 0;'>"
-            f"ðŸ”¬ Prioritized Investigation Steps</div>",
+            f"🔬 Prioritized Investigation Steps</div>",
             unsafe_allow_html=True,
         )
         for idx, step in enumerate(diagnosis.investigation_steps, start=1):
@@ -131,14 +131,14 @@ def render_ai_diagnostic_card(
     if diagnosis.remediation_actions:
         st.markdown(
             f"<div style='font-size:12px; font-weight:700; color:{tokens.text_secondary}; text-transform:uppercase; letter-spacing:0.6px; margin: 16px 0 6px 0;'>"
-            f"ðŸ› ï¸ Prioritized Remediation Runbook (Human Review Required)</div>",
+            f"🛠️ Prioritized Remediation Runbook (Human Review Required)</div>",
             unsafe_allow_html=True,
         )
 
         st.markdown(
             f"""<div style="background:rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius:6px; padding:10px 14px; margin-bottom:12px;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:15px;">âš ï¸</span>
+                    <span style="font-size:15px;">⚠️</span>
                     <span style="font-size:11px; font-weight:800; color:#EF4444; text-transform:uppercase; letter-spacing:0.8px;">Mandatory Operator Review Required</span>
                 </div>
                 <div style="font-size:11px; color:#F8FAFC; margin-top:4px; line-height:1.4;">
@@ -163,7 +163,7 @@ def render_ai_diagnostic_card(
                     f"<div style='background:{tokens.bg_app}; border:1px solid {tokens.border_color}; border-radius:4px; padding:6px 10px; overflow-x:auto; max-width:100%;'>"
                     f"<code style='color:#38BDF8; font-family:monospace; font-size:12px; white-space:pre-wrap; word-break:break-all;'>{act.command}</code>"
                     f"</div>"
-                    f"<span style='font-size:10px; color:#94A3B8;'><i>âš ï¸ Manual review required â€” command execution is disabled</i></span>"
+                    f"<span style='font-size:10px; color:#94A3B8;'><i>⚠️ Manual review required — command execution is disabled</i></span>"
                     f"</div>"
                 )
             else:
@@ -187,7 +187,7 @@ def render_ai_diagnostic_card(
     st.markdown(
         f"""<div style="background-color:rgba(148, 163, 184, 0.08); border-left: 3px solid #64748B; border-radius:4px; padding:10px 14px; margin-top:14px;">
             <div style="font-size:11px; font-weight:700; color:{tokens.text_secondary}; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">
-                â„¹ï¸ Evidence Boundaries &amp; Uncertainty Assessment
+                ℹ️ Evidence Boundaries &amp; Uncertainty Assessment
             </div>
             <div style="font-size:11px; color:{tokens.text_muted}; line-height:1.4;">
                 {diagnosis.uncertainty_assessment}

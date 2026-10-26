@@ -167,7 +167,7 @@ export const DatabaseStatusView: React.FC = () => {
                 <StatusBadge status={systemStatus.overall_status} />
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-                {systemStatus.headline} â€¢ Evaluation Time: {systemStatus.timestamp}
+                {systemStatus.headline} • Evaluation Time: {systemStatus.timestamp}
               </div>
             </div>
           </div>

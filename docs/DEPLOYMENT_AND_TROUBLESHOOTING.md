@@ -1,4 +1,4 @@
-# SentinelAI â€” Deployment, Configuration & Troubleshooting Guide
+# SentinelAI — Deployment, Configuration & Troubleshooting Guide
 
 ## 1. System Requirements & Tested Environment
 
@@ -28,8 +28,8 @@ SentinelAI requires **zero configuration** to start with nominal defaults. All s
 | `METRIC_COLLECTION_INTERVAL` | `5.0` | Positive float (seconds) | Background telemetry probe cadence |
 | `DATABASE_PATH` | `data/telemetry.db` | Filesystem path | SQLite database file location |
 | `API_HOST` | `0.0.0.0` | IP string | FastAPI REST bind address |
-| `API_PORT` | `8000` | Port integer (1024â€“65535) | REST API listening port |
-| `DASHBOARD_PORT` | `8501` | Port integer (1024â€“65535) | Streamlit dashboard listening port |
+| `API_PORT` | `8000` | Port integer (1024–65535) | REST API listening port |
+| `DASHBOARD_PORT` | `8501` | Port integer (1024–65535) | Streamlit dashboard listening port |
 | `AI_ENABLED` | `true` | `true`, `false` | Master toggle for AI diagnostic engine |
 | `AI_PROVIDER` | `ollama` | `ollama`, `heuristic`, `mock` | Active inference provider |
 | `AI_BASE_URL` | `http://localhost:11434` | HTTP/HTTPS URL | Local Ollama REST endpoint |
@@ -90,19 +90,19 @@ To test prerequisites without starting processes:
 
 ### Method B: Three-Terminal Manual Startup (Debugging & Live Output)
 
-**Terminal 1 â€” Ollama Daemon**:
+**Terminal 1 — Ollama Daemon**:
 ```powershell
 $env:OLLAMA_MODELS = "E:\Downloads\.ollama\models"
 ollama serve
 ```
 
-**Terminal 2 â€” FastAPI REST Backend**:
+**Terminal 2 — FastAPI REST Backend**:
 ```powershell
 .venv\Scripts\python.exe run_api.py
 ```
 *Listening on `http://127.0.0.1:8000` (Swagger docs: `/docs`)*
 
-**Terminal 3 â€” Streamlit Dashboard**:
+**Terminal 3 — Streamlit Dashboard**:
 ```powershell
 .venv\Scripts\python.exe -m streamlit run app/dashboard/dashboard_main.py --server.port 8501
 ```
@@ -131,7 +131,7 @@ This script queries ports 8000 and 8501, verifies the owning processes are Pytho
 | **Deterministic Anomaly Simulation**| âœ… Yes | âŒ No | Fully operational (6 reproducible profiles) |
 | **SQLite Metric/Feature Storage** | âœ… Yes | âŒ No | Fully operational time-series persistence |
 | **FastAPI REST Endpoints** | âœ… Yes | âŒ No | All telemetry, ML, and simulation routes online |
-| **Diagnostic Incident Runbook** | âœ… Yes | âš ï¸ Optional | **Automatic deterministic fallback engages** |
+| **Diagnostic Incident Runbook** | âœ… Yes | ⚠️ Optional | **Automatic deterministic fallback engages** |
 | **Generative LLM Incident Runbook**| âŒ No | âœ… Yes | Engages when Ollama is running and responsive |
 
 ---
