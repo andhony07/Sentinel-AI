@@ -457,15 +457,6 @@ SentinelAI/
 
 ---
 
-## Roadmap
-
-- [ ] **Multi-Node Agent Aggregation:** Lightweight collector agents reporting telemetry from multiple remote nodes to a centralized SentinelAI coordinator.
-- [ ] **eBPF Linux Telemetry:** Kernel-level socket and disk latency profiling on Linux hosts using eBPF probes.
-- [ ] **Webhook Alert Integrations:** Outbound webhook dispatch to Slack, PagerDuty, and Discord incident channels.
-- [ ] **Custom Fine-Tuned Gemma Weights:** Specialized fine-tuning on Linux sysadmin troubleshooting manuals and post-mortem post-incident reports.
-
----
-
 ## Contributing
 
 Contributions, bug reports, and feature proposals are welcome!
