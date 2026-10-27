@@ -20,6 +20,24 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+import importlib
+try:
+    import app.database.models
+    if not hasattr(app.database.models, "RiskAlertRecord"):
+        importlib.reload(app.database.models)
+    import app.dashboard.services.dashboard_service
+    if not hasattr(app.dashboard.services.dashboard_service.DashboardService, "alert_service"):
+        importlib.reload(app.dashboard.services.dashboard_service)
+except Exception:
+    pass
+
 from app.core.config import Settings, get_settings
 from app.dashboard.charts.builders import (
     build_anomaly_scatter_chart,
@@ -67,10 +85,21 @@ def main() -> None:
     """Main dashboard application flow."""
     configure_page()
     service = get_dashboard_service()
-    if not hasattr(service, "run_simulation") or not hasattr(service, "get_operational_status"):
+    if (
+        not hasattr(service, "run_simulation")
+        or not hasattr(service, "get_operational_status")
+        or not hasattr(service, "alert_service")
+        or getattr(service, "alert_service", None) is None
+    ):
         # Invalidate stale in-memory cached instance from prior Streamlit hot-reload
         get_dashboard_service.clear()
         service = get_dashboard_service()
+
+    # Defensive guarantee for backward compatibility with external/cached instances
+    if not hasattr(service, "alert_service") or service.alert_service is None:
+        from app.alerts.service import AlertService
+        service.alert_service = AlertService(settings=service.settings)
+
     settings: Settings = service.settings
 
 
@@ -101,6 +130,7 @@ def main() -> None:
             options=[
                 "📊 System Overview",
                 "🛡️ Health & Failure Risk",
+                "🚨 Risk Alerts & Incidents",
                 "🧪 Anomaly Simulation Lab",
                 "⚡ Real-Time Monitoring",
                 "📈 Telemetry History",
@@ -190,6 +220,29 @@ def main() -> None:
         theme="dark",
         section_title=section_name,
     )
+
+    # Global Persistent In-App Alert Banner for HIGH or CRITICAL active incidents
+    try:
+        alert_sum = service.alert_service.get_summary()
+        if alert_sum.active_count > 0 and alert_sum.latest_active_alert is not None:
+            latest_alt = alert_sum.latest_active_alert
+            is_crit = latest_alt.severity == "CRITICAL"
+            bg_col = "rgba(159, 18, 57, 0.25)" if is_crit else "rgba(180, 83, 9, 0.25)"
+            bd_col = "#f43f5e" if is_crit else "#f59e0b"
+            tx_col = "#fecdd3" if is_crit else "#fef3c7"
+            bg_badge = "#be123c" if is_crit else "#b45309"
+            obs_str = latest_alt.observed_value_str or (f"{latest_alt.observed_value:.1f}" if latest_alt.observed_value is not None else "Threshold Exceeded")
+            st.markdown(
+                f"""<div style="background:{bg_col}; border:1px solid {bd_col}; border-radius:6px; padding:10px 16px; margin: 0 0 16px 0; display:flex; align-items:center; justify-content:space-between;">
+                    <div style="color:{tx_col}; font-size:12.5px;">
+                        <span style="background:{bg_badge}; color:#ffffff; font-size:10px; font-weight:800; padding:2px 7px; border-radius:3px; letter-spacing:0.5px; margin-right:8px;">{latest_alt.severity} ALERT</span>
+                        <strong>{latest_alt.title}</strong> &mdash; {latest_alt.summary} (Observed: {obs_str} on <code>{latest_alt.server_id}</code>)
+                    </div>
+                </div>""",
+                unsafe_allow_html=True,
+            )
+    except Exception as banner_err:
+        pass
 
     # -------------------------------------------------------------------------
     # Page 1: System Overview
@@ -338,6 +391,165 @@ def main() -> None:
     # -------------------------------------------------------------------------
     # Page 2: Health & Risk Analysis
     # -------------------------------------------------------------------------
+    elif page in ("🚨 Risk Alerts & Incidents", "🚨 Risk Alerts"):
+        # -------------------------------------------------------------------------
+        # -------------------------------------------------------------------------
+        # Risk Alerts & Incident Notifications Page
+        # -------------------------------------------------------------------------
+        st.markdown(
+            f"""<div style="margin-bottom:18px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                    <span style="background:rgba(239, 68, 68, 0.16); color:#F43F5E; border:1px solid rgba(239, 68, 68, 0.4); padding:2px 8px; border-radius:4px; font-size:10px; font-weight:800; letter-spacing:0.8px;">OPERATIONAL ALERTING</span>
+                    <span style="font-size:12px; color:#94A3B8; text-transform:uppercase; font-weight:600; letter-spacing:0.5px;">Incident Lifecycle &amp; Telemetry Breaches</span>
+                </div>
+                <h2 style="margin:0 0 4px 0; font-size:22px; font-weight:700; color:{tokens.text_primary};">
+                    🚨 Risk Alerts &amp; Incident Notifications
+                </h2>
+                <p style="margin:0; font-size:12px; color:{tokens.text_secondary};">
+                    Authoritative incident lifecycle tracking for HIGH and CRITICAL server operational risk conditions.
+                </p>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
+        try:
+            sum_data = service.alert_service.get_summary()
+            all_alerts, total_count = service.alert_service.list_alerts(limit=100)
+        except Exception as alert_err:
+            st.error(f"Failed to load alert subsystem: {alert_err}")
+            sum_data = None
+            all_alerts = []
+
+        if sum_data is not None:
+            # KPI Metrics Row (5 Cards)
+            k1, k2, k3, k4, k5 = st.columns(5)
+            with k1:
+                st.metric("Active Incidents", sum_data.active_count)
+            with k2:
+                st.metric("Critical Risk", sum_data.critical_count)
+            with k3:
+                st.metric("High Risk", sum_data.high_count)
+            with k4:
+                st.metric("Acknowledged", sum_data.acknowledged_count)
+            with k5:
+                st.metric("Resolved", sum_data.resolved_count)
+
+            st.markdown("<div style='height:16px;'></div>", unsafe_allow_html=True)
+
+            # Interactive Filter & Search Controls
+            col_search, col_f_status, col_f_sev = st.columns([2.5, 1.2, 1.2])
+            with col_search:
+                search_q = st.text_input("Filter Incidents", placeholder="Search by server ID, metric name, or title...", label_visibility="collapsed")
+            with col_f_status:
+                selected_status = st.selectbox("Status", options=["All Statuses", "ACTIVE", "ACKNOWLEDGED", "RESOLVED"], label_visibility="collapsed")
+            with col_f_sev:
+                selected_sev = st.selectbox("Severity", options=["All Severities", "CRITICAL", "HIGH"], label_visibility="collapsed")
+
+            # Filter logic
+            filtered_alerts = all_alerts
+            if selected_status != "All Statuses":
+                filtered_alerts = [a for a in filtered_alerts if a.status == selected_status]
+            if selected_sev != "All Severities":
+                filtered_alerts = [a for a in filtered_alerts if a.severity == selected_sev]
+            if search_q.strip():
+                sq = search_q.strip().lower()
+                filtered_alerts = [
+                    a for a in filtered_alerts
+                    if sq in a.server_id.lower() or sq in a.trigger_metric.lower() or sq in a.title.lower() or sq in a.summary.lower()
+                ]
+
+            if not filtered_alerts:
+                st.markdown(
+                    f"""<div class="sentinel-empty-state aiops-empty-state" style="margin-top:16px; padding:36px 20px; text-align:center; border:1px dashed {tokens.border_color}; border-radius:8px; background:rgba(15, 23, 42, 0.4);">
+                        <div style="font-size:32px; margin-bottom:8px;">🛡️</div>
+                        <div class="title" style="font-size:16px; font-weight:700; color:#10B981; margin-bottom:4px;">All Monitored Instances Normal</div>
+                        <div class="desc" style="font-size:12px; color:{tokens.text_muted}; max-width:440px; margin:0 auto;">
+                            No alerts match the active filter criteria. Hardware telemetry remains in healthy operational bands.
+                        </div>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
+            else:
+                for alt in filtered_alerts:
+                    is_crit = alt.severity == "CRITICAL"
+                    sev_color = "#EF4444" if is_crit else "#F59E0B"
+                    sev_bg = "rgba(239, 68, 68, 0.16)" if is_crit else "rgba(245, 158, 11, 0.16)"
+                    status_color = "#EF4444" if alt.status == "ACTIVE" else ("#38BDF8" if alt.status == "ACKNOWLEDGED" else "#10B981")
+                    status_bg = "rgba(239, 68, 68, 0.1)" if alt.status == "ACTIVE" else ("rgba(56, 189, 248, 0.1)" if alt.status == "ACKNOWLEDGED" else "rgba(16, 185, 129, 0.1)")
+                    obs = alt.observed_value_str or (f"{alt.observed_value:.2f}" if alt.observed_value is not None else "N/A")
+                    card_border = "rgba(239, 68, 68, 0.4)" if is_crit else "rgba(245, 158, 11, 0.35)"
+
+                    st.markdown(
+                        f"""<div style="border:1px solid {card_border}; border-radius:8px; background:#111827; padding:16px 18px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,0.25);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="background:{sev_bg}; color:{sev_color}; border:1px solid {sev_color}60; font-size:10px; font-weight:800; padding:2px 8px; border-radius:4px; letter-spacing:0.6px;">{alt.severity}</span>
+                                    <span style="background:{status_bg}; color:{status_color}; font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; text-transform:uppercase;">{alt.status}</span>
+                                    <span style="font-size:11px; font-family:monospace; color:{tokens.text_muted};">{alt.alert_id}</span>
+                                </div>
+                                <div style="font-size:11px; color:{tokens.text_muted};">
+                                    {alt.created_at}
+                                </div>
+                            </div>
+                            <div style="font-size:15px; font-weight:700; color:{tokens.text_primary}; margin-bottom:4px;">
+                                {alt.title}
+                            </div>
+                            <div style="font-size:12px; color:{tokens.text_secondary}; margin-bottom:12px;">
+                                {alt.summary}
+                            </div>
+                        </div>""",
+                        unsafe_allow_html=True,
+                    )
+
+                    # 4 Metric Details in Columns
+                    c_m1, c_m2, c_m3, c_m4 = st.columns(4)
+                    with c_m1:
+                        st.caption("Monitored Instance")
+                        st.markdown(f"**`{alt.server_id}`**")
+                    with c_m2:
+                        st.caption("Triggering Metric")
+                        st.markdown(f"**{alt.trigger_metric}** ({obs})")
+                    with c_m3:
+                        st.caption("Composite Risk Score")
+                        st.markdown(f"**{alt.risk_score:.2f}** ({alt.risk_category})")
+                    with c_m4:
+                        st.caption("Health Score")
+                        h_val = f"{alt.health_score:.1f}/100" if alt.health_score is not None else "--"
+                        st.markdown(f"**{h_val}**")
+
+                    # Diagnostic Findings Container
+                    with st.expander("🔍 Detailed Diagnostic Findings & Remediation Runbook", expanded=(alt.status == "ACTIVE")):
+                        st.markdown(f"**Diagnostic Analysis:** {alt.diagnostic_explanation}")
+                        st.markdown(f"**Investigation Guidance:** {alt.recommended_action}")
+                        if alt.remediation_steps:
+                            st.markdown("**Actionable Remediation Steps:**")
+                            for idx, step in enumerate(alt.remediation_steps, 1):
+                                st.markdown(f"{idx}. {step}")
+                        if alt.ai_explanation:
+                            st.info(f"**Gemma 4 AI Root-Cause Assessment:** {alt.ai_explanation}")
+
+                        # Action Buttons in Expander
+                        col_ack, col_res, col_space = st.columns([1.2, 1.2, 3])
+                        if alt.status == "ACTIVE":
+                            with col_ack:
+                                if st.button("Acknowledge Alert", key=f"st_ack_{alt.alert_id}", type="primary"):
+                                    service.alert_service.acknowledge_alert(alt.alert_id, acknowledged_by="streamlit_operator")
+                                    st.success(f"Alert {alt.alert_id} acknowledged.")
+                                    st.rerun()
+                        if alt.status in ("ACTIVE", "ACKNOWLEDGED"):
+                            with col_res:
+                                if st.button("Mark Resolved", key=f"st_res_{alt.alert_id}"):
+                                    service.alert_service.resolve_alert(alt.alert_id)
+                                    st.success(f"Alert {alt.alert_id} resolved.")
+                                    st.rerun()
+
+                        if alt.acknowledged_at:
+                            st.caption(f"Operator Acknowledged by `{alt.acknowledged_by}` at {alt.acknowledged_at}")
+                        if alt.resolved_at:
+                            st.caption(f"Resolved at {alt.resolved_at}")
+
+                    st.markdown("<hr style='margin:12px 0 18px 0; border:none; border-top:1px solid #1e293b;'>", unsafe_allow_html=True)
+
     elif page in ("🛡️ Health & Failure Risk", "🛡️ Health & Risk Analysis"):
         # Section Header
         st.markdown(
@@ -589,6 +801,9 @@ def main() -> None:
             )
             st.markdown(dossier_html, unsafe_allow_html=True)
 
+        # Initialize custom metric overrides dictionary
+        custom_overrides: dict[str, Any] = {}
+
         with col_opts:
             st.markdown(
                 '<div style="font-size:12px; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px;">Execution Parameters</div>',
@@ -596,6 +811,26 @@ def main() -> None:
             )
             sim_seed = st.number_input("Deterministic Random Seed", min_value=1, max_value=99999, value=42, step=1)
             persist_sim = st.checkbox("Commit Sample to SQLite", value=False, help="Persist the generated telemetry and 39-feature vector into the database.")
+
+            with st.expander("🛠️ Advanced Metric Overrides (Optional)", expanded=False):
+                st.caption("Override scenario default telemetry levels (set to 0.0 to retain scenario baseline):")
+                ov_col_a, ov_col_b = st.columns(2)
+                with ov_col_a:
+                    ov_cpu = st.number_input("CPU %", min_value=0.0, max_value=100.0, value=0.0, step=0.5, key=f"ov_cpu_{selected_scenario.value}")
+                    ov_disk = st.number_input("Disk %", min_value=0.0, max_value=100.0, value=0.0, step=0.5, key=f"ov_disk_{selected_scenario.value}")
+                with ov_col_b:
+                    ov_mem = st.number_input("Memory %", min_value=0.0, max_value=100.0, value=0.0, step=0.5, key=f"ov_mem_{selected_scenario.value}")
+                    ov_net = st.number_input("Net TX (KB/s)", min_value=0.0, max_value=1_000_000.0, value=0.0, step=100.0, key=f"ov_net_{selected_scenario.value}")
+
+                if ov_cpu > 0.0:
+                    custom_overrides["cpu_percent"] = float(ov_cpu)
+                if ov_mem > 0.0:
+                    custom_overrides["memory_percent"] = float(ov_mem)
+                if ov_disk > 0.0:
+                    custom_overrides["disk_percent"] = float(ov_disk)
+                if ov_net > 0.0:
+                    custom_overrides["net_tx_bps"] = float(ov_net * 1024.0)
+
             run_sim = st.button("🚀 Run Anomaly Simulation", type="primary", width="stretch")
 
         if run_sim or "last_sim_result" in st.session_state:
@@ -605,10 +840,12 @@ def main() -> None:
                         scenario=selected_scenario,
                         persist=persist_sim,
                         seed=int(sim_seed),
+                        **custom_overrides,
                     )
                     st.session_state["last_sim_result"] = sim_res
                     st.session_state["last_sim_diag"] = sim_diag
                     st.session_state["last_sim_seed"] = int(sim_seed)
+                    st.session_state["last_sim_overrides"] = custom_overrides
             else:
                 sim_res = st.session_state["last_sim_result"]
                 sim_diag = st.session_state["last_sim_diag"]
@@ -727,11 +964,13 @@ def main() -> None:
             with col_sim_ai:
                 if st.button("🧠 Generate AI Diagnosis for Scenario", key=f"btn_sim_ai_{selected_scenario.value}"):
                     with st.spinner("Synthesizing simulation telemetry into AI runbook (CPU inference ~45–75s; automatic fallback on timeout)..."):
+                        effective_overrides = st.session_state.get("last_sim_overrides", custom_overrides)
+                        effective_seed = st.session_state.get("last_sim_seed", int(sim_seed))
                         sim_ai_diag = service.ai_service.diagnose_simulation_sync(
                             scenario=selected_scenario,
                             persist=False,
-                            seed=42,
-                            **custom_overrides,
+                            seed=effective_seed,
+                            **effective_overrides,
                         )
                         st.session_state[f"sim_ai_diag_{selected_scenario.value}"] = sim_ai_diag
 

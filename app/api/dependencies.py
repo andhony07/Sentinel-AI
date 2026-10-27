@@ -102,3 +102,29 @@ def reset_ai_diagnostic_service(new_service: Optional[Any] = None) -> None:
     global _ai_service_instance
     with _ai_service_lock:
         _ai_service_instance = new_service
+
+_alert_service_instance: Optional[Any] = None
+_alert_service_lock = threading.Lock()
+
+
+def get_alert_service(
+    settings: Settings = Depends(get_api_settings),
+    dashboard_service: DashboardService = Depends(get_dashboard_service),
+) -> Any:
+    """Provide a shared AlertService instance coordinated with DashboardService.
+
+    Thread-safe lazy initialization ensures a single alert service coordinator
+    is reused across API requests and background monitoring tasks within the server process.
+    """
+    global _alert_service_instance
+    with _alert_service_lock:
+        if _alert_service_instance is not None:
+            return _alert_service_instance
+        return dashboard_service.alert_service
+
+
+def reset_alert_service(new_service: Optional[Any] = None) -> None:
+    """Reset or override the global alert service coordinator (primarily for testing)."""
+    global _alert_service_instance
+    with _alert_service_lock:
+        _alert_service_instance = new_service

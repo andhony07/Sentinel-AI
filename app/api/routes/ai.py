@@ -68,8 +68,9 @@ async def get_latest_ai_diagnosis(
     if cached is not None:
         return cached
 
-    # If no cached diagnosis exists, evaluate latest telemetry snapshot
-    return await service.diagnose_latest()
+    # If no cached diagnosis exists, evaluate latest telemetry snapshot with deterministic fallback
+    # to avoid blocking passive page loading queries for 30+ seconds when the LLM service is offline or cold
+    return await service.diagnose_latest(force_fallback=True)
 
 
 @router.get(

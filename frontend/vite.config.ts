@@ -21,5 +21,18 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    preview: {
+      port: 5173,
+      proxy: {
+        '/api': {
+          target: backendTarget,
+          changeOrigin: true,
+        },
+        '/healthz': {
+          target: backendTarget,
+          changeOrigin: true,
+        },
+      },
+    },
   }
 })

@@ -60,6 +60,7 @@ class DashboardService:
         pipeline: Optional[PreprocessingPipeline] = None,
         simulator: Optional[DeterministicAnomalySimulator] = None,
         diagnostic_engine: Optional[DiagnosticEngine] = None,
+        alert_service: Optional[Any] = None,
     ) -> None:
         """Initialize the dashboard service.
 
@@ -90,6 +91,29 @@ class DashboardService:
             diagnostic_engine or DiagnosticEngine()
         )
         self._ai_service: Optional[Any] = None
+        self._alert_service: Optional[Any] = alert_service
+        if self._alert_service is None:
+            from app.alerts.service import AlertService
+            self._alert_service = AlertService(settings=self.settings, diagnostic_engine=self.diagnostic_engine)
+
+    @property
+    def alert_service(self) -> Any:
+        """Return the AlertService coordinator."""
+        if getattr(self, "_alert_service", None) is None:
+            from app.alerts.service import AlertService
+            self._alert_service = AlertService(settings=self.settings, diagnostic_engine=self.diagnostic_engine)
+        return self._alert_service
+
+    @alert_service.setter
+    def alert_service(self, value: Any) -> None:
+        self._alert_service = value
+
+    def __getattr__(self, name: str) -> Any:
+        if name == "alert_service":
+            from app.alerts.service import AlertService
+            self._alert_service = AlertService(settings=self.settings, diagnostic_engine=self.diagnostic_engine)
+            return self._alert_service
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
     @property
     def ai_service(self) -> Any:
@@ -209,6 +233,17 @@ class DashboardService:
                     top_process_memory_percent=top_p.memory_percent if top_p else None,
                 )
 
+            # Authoritative alert evaluation on live snapshot
+            if self.alert_service is not None and prediction is not None:
+                try:
+                    self.alert_service.process_prediction(
+                        prediction=prediction,
+                        metrics=metrics,
+                        processed=processed,
+                    )
+                except Exception as alert_err:
+                    logger.warning("Error processing alert in capture_live_snapshot: %s", alert_err)
+
             return latest_record, prediction, None
         except Exception as exc:
             logger.error("Failed to capture live telemetry snapshot: %s", exc, exc_info=True)
@@ -247,6 +282,16 @@ class DashboardService:
                         metrics = self.collector.collect()
                         processed = self.pipeline.process(metrics)
                         self.persistence.persist_sample(metrics, processed)
+                        prediction = self.prediction_service.predict(processed)
+                        if self.alert_service is not None and prediction is not None:
+                            try:
+                                self.alert_service.process_prediction(
+                                    prediction=prediction,
+                                    metrics=metrics,
+                                    processed=processed,
+                                )
+                            except Exception as alert_err:
+                                logger.warning("Error processing alert in background monitoring: %s", alert_err)
                     except Exception as err:
                         logger.warning("Error in background monitoring iteration: %s", err)
                     self._stop_event.wait(timeout=sample_interval)

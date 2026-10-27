@@ -5,3 +5,5 @@ export * from './RealTimeMonitoringView';
 export * from './HistoricalTelemetryView';
 export * from './AnomalyAuditLogView';
 export * from './DatabaseStatusView';
+
+export * from './AlertsNotificationsView';

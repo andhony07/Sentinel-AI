@@ -237,5 +237,6 @@ def diagnostic_report_to_ai_diagnosis(
         is_fallback=True,
         model_used="heuristic_fallback",
         latency_ms=latency_ms,
+        fallback_reason=fallback_reason,
         metadata=meta,
     )

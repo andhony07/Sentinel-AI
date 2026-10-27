@@ -344,3 +344,102 @@ class TestAIDiagnosticCardComponent:
             assert "gemma-4-26b-a4b-it" in all_rendered
             assert "Mandatory Operator Review Required" in all_rendered
             assert "Gemma 4 diagnostic report: Compute starvation detected." in all_rendered
+
+
+class TestDashboardSimulationCustomOverridesRegression:
+    """Regression tests for custom_overrides and simulation AI diagnosis in dashboard."""
+
+    def test_simulation_ai_diagnosis_accepts_custom_overrides(self, tmp_path):
+        """Verify that diagnose_simulation_sync correctly accepts custom_overrides without NameError."""
+        from app.core.config import load_config
+        from app.dashboard.services.dashboard_service import DashboardService
+        from app.ai.service import AIDiagnosticService
+        from app.ml.simulation import SimulationScenario
+
+        settings = load_config(
+            database_path=tmp_path / "sim_ov_test.db",
+            data_dir=tmp_path / "data",
+            logs_dir=tmp_path / "logs",
+            ai_enabled=True,
+            ai_provider="heuristic",
+            db_auto_init=True,
+        )
+        settings.ensure_directories()
+        dash_service = DashboardService(settings=settings)
+        ai_service = AIDiagnosticService(settings=settings, dashboard_service=dash_service)
+
+        # Real custom overrides provided by operator in Simulation Lab
+        custom_overrides = {
+            "cpu_percent": 98.5,
+            "memory_percent": 88.0,
+            "disk_percent": 91.2,
+            "net_tx_bps": 500000.0,
+        }
+
+        # Must execute cleanly without NameError or TypeError
+        sim_ai_diag = ai_service.diagnose_simulation_sync(
+            scenario=SimulationScenario.CPU_SPIKE,
+            persist=False,
+            seed=42,
+            **custom_overrides,
+        )
+
+        assert sim_ai_diag is not None
+        assert sim_ai_diag.is_fallback is True
+        assert "cpu_spike" in sim_ai_diag.metadata.get("scenario", "")
+        assert sim_ai_diag.metadata.get("simulation") is True
+
+    def test_simulation_ai_diagnosis_empty_overrides_scope(self, tmp_path):
+        """Verify that diagnose_simulation_sync works when custom_overrides is empty dict."""
+        from app.core.config import load_config
+        from app.dashboard.services.dashboard_service import DashboardService
+        from app.ai.service import AIDiagnosticService
+        from app.ml.simulation import SimulationScenario
+
+        settings = load_config(
+            database_path=tmp_path / "sim_empty_ov_test.db",
+            data_dir=tmp_path / "data",
+            logs_dir=tmp_path / "logs",
+            ai_enabled=True,
+            ai_provider="heuristic",
+            db_auto_init=True,
+        )
+        settings.ensure_directories()
+        dash_service = DashboardService(settings=settings)
+        ai_service = AIDiagnosticService(settings=settings, dashboard_service=dash_service)
+
+        custom_overrides = {}
+        sim_ai_diag = ai_service.diagnose_simulation_sync(
+            scenario=SimulationScenario.MEMORY_LEAK,
+            persist=False,
+            seed=42,
+            **custom_overrides,
+        )
+
+        assert sim_ai_diag is not None
+        assert sim_ai_diag.is_fallback is True
+        assert "memory_leak" in sim_ai_diag.metadata.get("scenario", "")
+
+    def test_dashboard_main_custom_overrides_defined_in_scope(self):
+        """Inspect app/dashboard/dashboard_main.py AST to verify custom_overrides is properly initialized and scoped."""
+        import ast
+
+        from pathlib import Path
+        app_file = Path(__file__).parent.parent / "app" / "dashboard" / "dashboard_main.py"
+        with open(app_file, "r", encoding="utf-8") as f:
+            code = f.read()
+
+        tree = ast.parse(code)
+        # Verify AST parses cleanly and custom_overrides assignment exists
+        found_assignment = False
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and target.id == "custom_overrides":
+                        found_assignment = True
+                        break
+            elif isinstance(node, ast.AnnAssign):
+                if isinstance(node.target, ast.Name) and node.target.id == "custom_overrides":
+                    found_assignment = True
+                    break
+        assert found_assignment, "custom_overrides assignment was not found in AST of dashboard_main.py"

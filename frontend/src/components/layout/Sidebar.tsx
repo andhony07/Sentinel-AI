@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Activity,
   AlertOctagon,
+  AlertTriangle,
   ChevronLeft,
   ChevronRight,
   Cpu,
@@ -16,6 +17,7 @@ import {
 export type ViewType =
   | 'overview'
   | 'health'
+  | 'alerts'
   | 'simulation'
   | 'realtime'
   | 'history'
@@ -26,6 +28,7 @@ interface SidebarProps {
   currentView: ViewType;
   onSelectView: (view: ViewType) => void;
   apiConnected: boolean;
+  activeAlertCount?: number;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   isMobileOpen?: boolean;
@@ -43,6 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentView,
   onSelectView,
   apiConnected,
+  activeAlertCount = 0,
   collapsed = false,
   onToggleCollapse,
   isMobileOpen = false,
@@ -58,6 +62,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'health',
       label: 'Health & Failure Risk',
       icon: <ShieldCheck size={18} />,
+    },
+    {
+      id: 'alerts',
+      label: 'Risk Alerts',
+      icon: <AlertTriangle size={18} />,
+      badge: activeAlertCount > 0 ? String(activeAlertCount) : undefined,
     },
     {
       id: 'simulation',
@@ -338,6 +348,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {item.label}
                   </span>
+                )}
+                {!collapsed && item.badge && (
+                  <span
+                    style={{
+                      padding: '1px 6px',
+                      fontSize: 10,
+                      fontWeight: 700,
+                      borderRadius: 10,
+                      backgroundColor: 'rgba(244, 63, 94, 0.25)',
+                      color: '#f43f5e',
+                      border: '1px solid rgba(244, 63, 94, 0.45)',
+                    }}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+                {collapsed && item.badge && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: 4,
+                      right: 4,
+                      width: 7,
+                      height: 7,
+                      borderRadius: '50%',
+                      backgroundColor: '#f43f5e',
+                    }}
+                  />
                 )}
               </button>
             );

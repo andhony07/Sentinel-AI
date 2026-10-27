@@ -327,7 +327,8 @@ class TestDashboardPlaywrightE2E:
             page.evaluate("window.scrollTo(0, 0)")
         page.wait_for_timeout(300)
 
-        # Check for timeseries chart
+        # Check for timeseries chart (allow time for Plotly async render)
+        page.wait_for_selector('.js-plotly-plot', timeout=10000)
         charts = page.locator('.js-plotly-plot').all()
         assert len(charts) >= 1, "Expected historical multi-metric time series chart"
 
@@ -452,11 +453,11 @@ class TestDashboardPlaywrightE2E:
         - API error handling with retry state
         """
         # Step 1: Open React frontend
-        page.goto(REACT_APP_URL, wait_until="networkidle")
+        page.goto(REACT_APP_URL, wait_until="domcontentloaded")
         page.wait_for_timeout(1000)
 
         # Step 2: Navigate to Health & Failure Risk view
-        health_nav_btn = page.locator('button', has_text='Health & Failure Risk').first
+        health_nav_btn = page.locator('#nav-item-health')
         health_nav_btn.wait_for(state="visible", timeout=10000)
         health_nav_btn.click()
         page.wait_for_timeout(1500)

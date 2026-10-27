@@ -177,3 +177,86 @@ class PersistenceResult:
     def to_dict(self) -> dict[str, Any]:
         """Convert persistence result to dictionary."""
         return asdict(self)
+
+
+@dataclass(frozen=True)
+class RiskAlertRecord:
+    """Represents a persisted risk alert record in the risk_alerts table.
+
+    Attributes:
+        id: Primary key identifier.
+        alert_id: Unique incident/alert identifier (e.g. 'alt-20261027-a1b2c3d4').
+        server_id: Identifier of the monitored server or instance.
+        severity: Alert severity ('HIGH' or 'CRITICAL').
+        status: Current incident lifecycle status ('ACTIVE', 'ACKNOWLEDGED', 'RESOLVED').
+        risk_category: Assigned RiskCategory ('High' or 'Critical').
+        risk_score: Normalized anomaly indicator score (0.0 - 1.0).
+        health_score: Composite deterministic health score (0.0 - 100.0) or None.
+        trigger_metric: Key metric that triggered the threshold (e.g. 'cpu_utilization_percent').
+        observed_value: Numeric observed metric value.
+        observed_value_str: Human-readable formatted observation (e.g. '96.2%').
+        title: Descriptive alert title.
+        summary: High-level incident summary.
+        ai_explanation: Optional incident explanation synthesized by LLM.
+        diagnostic_explanation: Deterministic evidence-backed diagnostic explanation.
+        recommended_action: Primary recommended investigation or mitigation step.
+        remediation_steps: Ordered list of suggested investigation steps.
+        created_at: Incident inception timestamp (UTC).
+        updated_at: Latest update timestamp (UTC).
+        acknowledged_at: Operator acknowledgement timestamp (UTC) or None.
+        acknowledged_by: Operator identifier or None.
+        resolved_at: Incident resolution timestamp (UTC) or None.
+        metric_id: Optional foreign key to triggering system_metrics record.
+    """
+
+    id: int
+    alert_id: str
+    server_id: str
+    severity: str
+    status: str
+    risk_category: str
+    risk_score: float
+    health_score: Optional[float]
+    trigger_metric: str
+    observed_value: Optional[float]
+    observed_value_str: Optional[str]
+    title: str
+    summary: str
+    ai_explanation: Optional[str]
+    diagnostic_explanation: str
+    recommended_action: str
+    remediation_steps: list[str] = field(default_factory=list)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    acknowledged_at: Optional[datetime] = None
+    acknowledged_by: Optional[str] = None
+    resolved_at: Optional[datetime] = None
+    metric_id: Optional[int] = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert alert record to a JSON-serializable dictionary."""
+        return {
+            "id": self.id,
+            "alert_id": self.alert_id,
+            "server_id": self.server_id,
+            "severity": self.severity,
+            "status": self.status,
+            "risk_category": self.risk_category,
+            "risk_score": round(self.risk_score, 4),
+            "health_score": round(self.health_score, 2) if self.health_score is not None else None,
+            "trigger_metric": self.trigger_metric,
+            "observed_value": self.observed_value,
+            "observed_value_str": self.observed_value_str,
+            "title": self.title,
+            "summary": self.summary,
+            "ai_explanation": self.ai_explanation,
+            "diagnostic_explanation": self.diagnostic_explanation,
+            "recommended_action": self.recommended_action,
+            "remediation_steps": list(self.remediation_steps),
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "acknowledged_at": self.acknowledged_at.isoformat() if self.acknowledged_at else None,
+            "acknowledged_by": self.acknowledged_by,
+            "resolved_at": self.resolved_at.isoformat() if self.resolved_at else None,
+            "metric_id": self.metric_id,
+        }

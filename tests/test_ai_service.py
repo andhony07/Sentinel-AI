@@ -457,6 +457,7 @@ class TestAIDiagnosticService:
                 database_path=tmp_path / "gemma_valid.db",
                 ai_enabled=True,
                 ai_provider="gemma",
+                gemma_api_key="",
                 db_auto_init=True,
             )
             settings.ensure_directories()

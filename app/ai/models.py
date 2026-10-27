@@ -161,6 +161,9 @@ class AIIncidentDiagnosis(BaseModel):
     latency_ms: float = Field(
         ge=0.0, default=0.0, description="Inference evaluation latency in ms"
     )
+    fallback_reason: Optional[str] = Field(
+        default=None, description="Explanation why fallback was engaged if is_fallback is True"
+    )
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Auxiliary runtime metadata"
     )
@@ -182,6 +185,7 @@ class AIIncidentDiagnosis(BaseModel):
             "is_fallback": self.is_fallback,
             "model_used": self.model_used,
             "latency_ms": round(self.latency_ms, 2),
+            "fallback_reason": self.fallback_reason,
             "metadata": dict(self.metadata),
         }
 

@@ -1,5 +1,7 @@
 import React from 'react';
 import {
+  Bell,
+  BellOff,
   Camera,
   CheckCircle2,
   Menu,
@@ -21,6 +23,8 @@ interface TopBarProps {
   autoRefresh: boolean;
   refreshInterval: number;
   lastUpdated: string | null;
+  notificationsEnabled?: boolean;
+  onToggleNotifications?: () => void;
   onCaptureSnapshot: () => void;
   onToggleWorker: () => void;
   onRefreshNow: () => void;
@@ -54,6 +58,10 @@ const VIEW_TITLES: Record<ViewType, { title: string; subtitle: string }> = {
     title: 'Incident & Audit Trail',
     subtitle: 'Historical anomaly evaluation records scored against Isolation Forest decision boundaries',
   },
+  alerts: {
+    title: 'Risk Alerts & Incident Notifications',
+    subtitle: 'Authoritative HIGH & CRITICAL alerts, incident deduplication, deterministic diagnostics, and desktop alerts',
+  },
   database: {
     title: 'System Operations',
     subtitle: 'SQLite physical storage summary, subsystem integrity, and validation audit logs',
@@ -69,6 +77,8 @@ export const TopBar: React.FC<TopBarProps> = ({
   autoRefresh,
   refreshInterval,
   lastUpdated,
+  notificationsEnabled = false,
+  onToggleNotifications,
   onCaptureSnapshot,
   onToggleWorker,
   onRefreshNow,
@@ -183,6 +193,45 @@ export const TopBar: React.FC<TopBarProps> = ({
         >
           {isBgRunning ? 'Stop Worker' : 'Start Worker'}
         </Button>
+
+        {/* Desktop Notifications Toggle Button */}
+        {onToggleNotifications && (
+          <button
+            type="button"
+            id="btn-desktop-notifications-toggle"
+            onClick={onToggleNotifications}
+            title={
+              notificationsEnabled
+                ? 'Desktop alert notifications active (click to disable)'
+                : 'Enable desktop alert notifications'
+            }
+            style={{
+              background: 'none',
+              border: '1px solid',
+              borderColor: notificationsEnabled ? 'rgba(16, 185, 129, 0.45)' : 'var(--border-default)',
+              borderRadius: 'var(--radius-md)',
+              color: notificationsEnabled ? '#10b981' : 'var(--text-secondary)',
+              padding: '0 8px',
+              height: 28,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              fontSize: 11,
+              fontWeight: 500,
+              transition: 'all 150ms ease',
+            }}
+          >
+            {notificationsEnabled ? (
+              <Bell size={12} style={{ color: '#10b981' }} />
+            ) : (
+              <BellOff size={12} />
+            )}
+            <span className="hidden sm:inline">
+              {notificationsEnabled ? 'Desktop: On' : 'Desktop: Off'}
+            </span>
+          </button>
+        )}
 
         {/* Auto Refresh & Controls */}
         <div

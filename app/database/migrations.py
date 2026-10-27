@@ -13,6 +13,7 @@ from typing import Callable, Final
 from app.core.logging_config import get_logger
 from app.database.connection import DatabaseMigrationError, transaction_scope
 from app.database.schema import (
+    CREATE_RISK_ALERTS_TABLE,
     CREATE_FEATURE_VECTORS_TABLE,
     CREATE_INDEXES_SQL,
     CREATE_SCHEMA_MIGRATIONS_TABLE,
@@ -58,6 +59,7 @@ def _migration_v1(conn: sqlite3.Connection) -> None:
     conn.execute(CREATE_SYSTEM_METRICS_TABLE)
     conn.execute(CREATE_FEATURE_VECTORS_TABLE)
     conn.execute(CREATE_VALIDATION_LOGS_TABLE)
+    conn.execute(CREATE_RISK_ALERTS_TABLE)
     for index_stmt in CREATE_INDEXES_SQL:
         conn.execute(index_stmt)
 
@@ -76,9 +78,19 @@ def _migration_v2(conn: sqlite3.Connection) -> None:
 
 
 # Ordered registry of schema migration actions
+
+def _migration_v3(conn: sqlite3.Connection) -> None:
+    """Apply version 3 migration: create risk_alerts table and alert indexes."""
+    conn.execute(CREATE_RISK_ALERTS_TABLE)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_risk_alerts_status ON risk_alerts(status);")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_risk_alerts_server_status ON risk_alerts(server_id, status);")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_risk_alerts_created_at ON risk_alerts(created_at);")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_risk_alerts_alert_id ON risk_alerts(alert_id);")
+
 MIGRATIONS: Final[dict[int, tuple[str, Callable[[sqlite3.Connection], None]]]] = {
     1: ("Initial telemetry, feature vectors, and validation audit tables", _migration_v1),
     2: ("Add disk active percent and disk read/write throughput columns", _migration_v2),
+    3: ("Create risk_alerts table and alert indexes", _migration_v3),
 }
 
 

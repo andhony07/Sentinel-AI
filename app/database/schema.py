@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Final
 
-SCHEMA_VERSION: Final[int] = 2
+SCHEMA_VERSION: Final[int] = 3
 
 FEATURE_COLUMNS: Final[tuple[str, ...]] = (
     # CPU Features (6)
@@ -128,7 +128,41 @@ CREATE TABLE IF NOT EXISTS validation_logs (
 """
 
 # Index declarations for fast timestamp-based and foreign-key queries
+
+CREATE_RISK_ALERTS_TABLE: Final[str] = """
+CREATE TABLE IF NOT EXISTS risk_alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    alert_id TEXT UNIQUE NOT NULL,
+    server_id TEXT NOT NULL,
+    severity TEXT NOT NULL,
+    status TEXT NOT NULL,
+    risk_category TEXT NOT NULL,
+    risk_score REAL NOT NULL,
+    health_score REAL,
+    trigger_metric TEXT NOT NULL,
+    observed_value REAL,
+    observed_value_str TEXT,
+    title TEXT NOT NULL,
+    summary TEXT NOT NULL,
+    ai_explanation TEXT,
+    diagnostic_explanation TEXT NOT NULL,
+    recommended_action TEXT NOT NULL,
+    remediation_steps_json TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    acknowledged_at TEXT,
+    acknowledged_by TEXT,
+    resolved_at TEXT,
+    metric_id INTEGER,
+    FOREIGN KEY (metric_id) REFERENCES system_metrics(id) ON DELETE SET NULL
+);
+"""
+
 CREATE_INDEXES_SQL: Final[list[str]] = [
+    "CREATE INDEX IF NOT EXISTS idx_risk_alerts_status ON risk_alerts(status);",
+    "CREATE INDEX IF NOT EXISTS idx_risk_alerts_server_status ON risk_alerts(server_id, status);",
+    "CREATE INDEX IF NOT EXISTS idx_risk_alerts_created_at ON risk_alerts(created_at);",
+    "CREATE INDEX IF NOT EXISTS idx_risk_alerts_alert_id ON risk_alerts(alert_id);",
     "CREATE INDEX IF NOT EXISTS idx_system_metrics_timestamp ON system_metrics(timestamp);",
     "CREATE INDEX IF NOT EXISTS idx_feature_vectors_timestamp ON feature_vectors(timestamp);",
     "CREATE INDEX IF NOT EXISTS idx_feature_vectors_metric_id ON feature_vectors(metric_id);",

@@ -7,6 +7,7 @@ import {
   stopMonitoring,
 } from './api';
 import { Layout } from './components/layout';
+import { useAlertNotifications } from './hooks/useAlertNotifications';
 import type { ViewType } from './components/layout';
 import {
   AnomalyAuditLogView,
@@ -16,6 +17,7 @@ import {
   RealTimeMonitoringView,
   SimulationStudioView,
   SystemOverviewView,
+  AlertsNotificationsView,
 } from './views';
 
 export const App: React.FC = () => {
@@ -23,11 +25,30 @@ export const App: React.FC = () => {
   const [apiConnected, setApiConnected] = useState<boolean>(true);
   const [isBgRunning, setIsBgRunning] = useState<boolean>(false);
   const [isSnapshotLoading, setIsSnapshotLoading] = useState<boolean>(false);
+
+
   const [isTogglingWorker, setIsTogglingWorker] = useState<boolean>(false);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
   const [refreshInterval, setRefreshInterval] = useState<number>(5);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState<number>(0);
+
+  // Authoritative alert lifecycle and browser notification hook
+  const {
+    summary: alertSummary,
+    activeAlerts,
+    permission,
+    isSupported,
+    notificationsEnabled,
+    requestPermission,
+    toggleNotifications,
+    refreshAlerts,
+  } = useAlertNotifications({
+    pollingIntervalMs: autoRefresh ? refreshInterval * 1000 : 5000,
+    onNavigateToAlerts: () => {
+      setCurrentView('alerts');
+    },
+  });
 
   // Check background worker and API liveness
   const checkHealth = useCallback(async () => {
@@ -59,6 +80,7 @@ export const App: React.FC = () => {
   // Global manual refresh trigger
   const handleRefreshNow = useCallback(() => {
     checkHealth();
+    refreshAlerts();
     setRefreshKey((prev) => prev + 1);
     setLastUpdated(new Date().toLocaleTimeString());
   }, [checkHealth]);
@@ -115,6 +137,18 @@ export const App: React.FC = () => {
         return <SystemOverviewView key={refreshKey} />;
       case 'health':
         return <HealthRiskView key={refreshKey} />;
+      case 'alerts':
+        return (
+          <AlertsNotificationsView
+            key={refreshKey}
+            notificationsEnabled={notificationsEnabled}
+            permission={permission}
+            isSupported={isSupported}
+            onToggleNotifications={toggleNotifications}
+            onRequestPermission={requestPermission}
+            onNavigateToDiagnostic={() => setCurrentView('health')}
+          />
+        );
       case 'simulation':
         return <SimulationStudioView key={refreshKey} />;
       case 'realtime':
@@ -135,6 +169,10 @@ export const App: React.FC = () => {
       currentView={currentView}
       onSelectView={setCurrentView}
       apiConnected={apiConnected}
+      activeAlertCount={alertSummary?.active_count || 0}
+      activeAlerts={activeAlerts}
+      notificationsEnabled={notificationsEnabled}
+      onToggleNotifications={toggleNotifications}
       isBgRunning={isBgRunning}
       isSnapshotLoading={isSnapshotLoading}
       isTogglingWorker={isTogglingWorker}

@@ -7,3 +7,4 @@ export * from './anomalies';
 export * from './database';
 export * from './export';
 export * from './ai';
+export * from './alerts';

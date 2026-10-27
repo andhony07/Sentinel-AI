@@ -43,6 +43,7 @@ export interface AIIncidentDiagnosis {
   is_fallback: boolean;
   model_used: string;
   latency_ms: number;
+  fallback_reason?: string;
   metadata?: Record<string, unknown>;
 }
 
